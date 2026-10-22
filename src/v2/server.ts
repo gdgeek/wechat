@@ -55,7 +55,14 @@ function requiredScalar(value: any, name: string): string {
   if (typeof value !== 'string' && typeof value !== 'number') throw new ApiError(400, `${name} must be a string`);
   return String(value);
 }
-async function getReport(s: Services, ctx: Context, token: string, uuid?: string): Promise<Row | null> {
+function reportedVersion(body: Row): number {
+  const value = Object.hasOwn(body, 'version') ? body.version : 0;
+  const match = typeof value === 'string' ? /^[\t\n\v\r ]*([+-]?(?:0|[1-9][0-9]*))[\t\n\v\r ]*$/.exec(value) : null;
+  const version = typeof value === 'number' ? value : match ? Number(match[1]) : NaN;
+  if (!Number.isInteger(version) || version < 0 || version > 2147483647) throw new ApiError(400, 'version must be an integer between 0 and 2147483647');
+  return version === 0 ? 0 : version;
+}
+async function getReport(s: Services, ctx: Context, token: string, uuid?: string, version = 0): Promise<Row | null> {
   let row = await s.redis.find('report', token);
   if (!uuid) return redisRow('report', row);
   row ||= { token, uuid, created_at: String(Math.floor(Date.now() / 1000)) };
@@ -64,6 +71,8 @@ async function getReport(s: Services, ctx: Context, token: string, uuid?: string
     if (!device) device = await s.db.insert('device', { uuid, version: 1, ip: ctx.req.ip, created_at: sqlNow(), updated_at: sqlNow() });
     row.device_id = device.id;
   }
+  // Yii updateAll() synchronizes every UUID login without firing timestamp behavior.
+  await s.db.execute('UPDATE device SET version = ? WHERE id = ?', [version, row.device_id]);
   for (const key of ['status', 'data']) if (truthy(ctx.body[key])) row[key] = ctx.body[key];
   row.updated_at = String(Math.floor(Date.now() / 1000));
   await s.redis.save('report', row);
@@ -101,9 +110,10 @@ export async function refresh(s: Services, ctx: Context, authenticatedUser?: Row
   if (values.length !== 1) throw new ApiError(400, 'Exactly one of uuid, id, or key must be provided');
   const kind = values[0], value = requiredScalar(ctx.body[kind], kind);
   await s.auth.requireDevice(ctx);
+  const version = kind === 'uuid' ? reportedVersion(ctx.body) : 0;
   await recordRequest(s, ctx, ctx.req.path?.split('/').pop() || 'refresh');
   const expands = new Set(csv(ctx.query.expand));
-  const report = await getReport(s, ctx, token, kind === 'uuid' ? value : undefined);
+  const report = await getReport(s, ctx, token, kind === 'uuid' ? value : undefined, version);
   const applet = await getApplet(s, ctx, token, kind === 'id' ? value : undefined, authenticatedUser);
   const file = await getFile(s, token, kind === 'key' ? value : undefined, applet);
   const data: Row = {};

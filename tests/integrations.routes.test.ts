@@ -55,6 +55,32 @@ describe('integration route contracts', () => {
     expect(await call('POST', '/v2/wechat/bind-phone', { code: 'phone-code', tel: 'forged' })).toMatchObject({ data: { phone: '8613800000000', purePhone: '13800000000', countryCode: '86' } });
     expect(users[0].tel).toBe('8613800000000');
   });
+  it('returns the legacy bad-request status when a verified phone is already bound', async () => {
+    const { call, integrations, db } = setup();
+    vi.spyOn(integrations, 'phone').mockResolvedValue({ phoneNumber: '8613800000000' });
+    db.update.mockRejectedValueOnce(Object.assign(new Error('Duplicate entry from private user.tel index'), { code: 'ER_DUP_ENTRY', sqlState: '23000' }));
+    await expect(call('POST', '/v2/wechat/bind-phone', { code: 'phone-code' })).rejects.toMatchObject({ status: 400, message: 'bind phone failed: Failed to save phone number' });
+  });
+  it('wraps provider failures in the legacy bind-phone bad-request response', async () => {
+    const { call, integrations } = setup();
+    const phone = vi.spyOn(integrations, 'phone');
+    for (const [status, message] of [[400, '微信服务请求失败，请重新授权'], [503, '外部服务暂时不可用']] as const) {
+      phone.mockRejectedValueOnce(new HttpException(message, status));
+      await expect(call('POST', '/v2/wechat/bind-phone', { code: 'phone-code' })).rejects.toMatchObject({ status: 400, message: `bind phone failed: ${message}` });
+    }
+  });
+  it('sanitizes unexpected phone persistence failures while retaining the legacy bad-request status', async () => {
+    const { call, integrations, db } = setup();
+    vi.spyOn(integrations, 'phone').mockResolvedValue({ phoneNumber: '8613800000000' });
+    db.update.mockRejectedValueOnce(new Error('private database connection and SQL details'));
+    await expect(call('POST', '/v2/wechat/bind-phone', { code: 'phone-code' })).rejects.toMatchObject({ status: 400, message: 'bind phone failed: Failed to save phone number' });
+  });
+  it('preserves the unwrapped missing-code error before requesting a phone', async () => {
+    const { call, integrations } = setup();
+    const phone = vi.spyOn(integrations, 'phone');
+    await expect(call('POST', '/v2/wechat/bind-phone')).rejects.toMatchObject({ status: 400, message: 'code parameter is required' });
+    expect(phone).not.toHaveBeenCalled();
+  });
   it('registers every legacy payment endpoint and preserves code-based validation', async () => {
     const { call, router } = setup();
     for (const version of ['v1', 'v2']) {

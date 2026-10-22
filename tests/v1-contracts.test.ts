@@ -246,6 +246,51 @@ test('v1 Redis responses include every declared attribute and hide v2-only field
 });
 
 describe('v1 Yii serialization regressions',()=>{
+  test('numeric balance fields reject JSON booleans and arrays before writing',async()=>{
+    await boot();const original=await db.one('SELECT * FROM player WHERE id = 2');
+    for (const field of ['recharge','cost','give']) {
+      for (const value of [true,false,[100],{},'0x10',' ','1.']) {
+        await expect(call('PATCH','/v1/player/:id',{[field]:value},{},{id:'2'})).rejects.toMatchObject({status:422});
+        expect(await db.one('SELECT * FROM player WHERE id = 2')).toEqual(original);
+      }
+    }
+  });
+  test('optional numeric fields skip empty array validation and cast them to zero as Yii does',async()=>{
+    await boot();
+    expect(await call('PATCH','/v1/player/:id',{recharge:[],cost:[],give:[],points:[],times:[],grade:[]},{},{id:'2'})).toMatchObject({recharge:0,cost:0,give:0,points:0,times:0,grade:0});
+  });
+  test('numeric balance fields retain Yii decimal and exponent string support',async()=>{
+    await boot();
+    expect((await call('PATCH','/v1/player/:id',{recharge:'1.25e2',cost:'.5',give:'-2.5'},{},{id:'2'}))).toMatchObject({recharge:125,cost:.5,give:-2.5});
+  });
+  test('integer fields reject numeric JSON arrays instead of coercing them',async()=>{
+    await boot();
+    await expect(call('PATCH','/v1/player/:id',{points:[100]},{},{id:'2'})).rejects.toMatchObject({status:422});
+    expect((await db.one('SELECT * FROM player WHERE id = 2'))!.points).toBe(50);
+  });
+  test('validation errors and empty inputs skip foreign and unique database lookups',async()=>{
+    await boot();
+    const original=db.one.bind(db);let unsafeLookup=false;
+    db.one=async(sql:string,params:any[]=[])=>{
+      if (params.some(value=>typeof value==='boolean' || value!==null && typeof value==='object')) unsafeLookup=true;
+      return original(sql,params);
+    };
+    for (const [table,body] of [['award',{shop_id:[]}],['award',{shop_id:true}],['record',{player_id:2,device_id:[1]}],['player',{tel:{bad:'type'}}]] as const) {
+      await expect(call('POST','/v1/'+table,body)).rejects.toMatchObject({status:422});
+    }
+    expect(unsafeLookup).toBe(false);
+    expect(await db.query('SELECT * FROM award')).toEqual([]);
+    expect(await db.query('SELECT * FROM record')).toEqual([]);
+  });
+  test('device version participates in inherited REST sorting and pagination',async()=>{
+    await boot();await db.update('device',1,{version:2});
+    await db.insert('device',{id:2,uuid:'older',version:1});await db.insert('device',{id:3,uuid:'newer',version:8});
+    expect(await call('GET','/v1/device',{}, {sort:'-version','per-page':1,page:2,fields:'id,version'})).toEqual([{id:1,version:2}]);
+  });
+  test('inherited REST sorting uses only the first valid attribute as Yii does',async()=>{
+    await boot();await db.update('device',1,{version:1});await db.insert('device',{id:2,uuid:'second',version:1});
+    expect(await call('GET','/v1/device',{}, {sort:'unknown,version,-id',fields:'id'})).toEqual([{id:1},{id:2}]);
+  });
   test('award default price applies to explicit null or empty updates',async()=>{
     await boot();const award=await call('POST','/v1/award',{shop_id:1,price:200,type:'s'});
     expect((await call('PATCH','/v1/award/:id',{price:null},{},{id:String(award.id)})).price).toBe(100);
@@ -253,6 +298,13 @@ describe('v1 Yii serialization regressions',()=>{
     expect((await call('PATCH','/v1/award/:id',{price:''},{},{id:String(award.id)})).price).toBe(100);
     await call('PATCH','/v1/award/:id',{price:300},{},{id:String(award.id)});
     expect((await call('PATCH','/v1/award/:id',{type:'m'},{},{id:String(award.id)})).price).toBe(300);
+  });
+  test('award empty array prices receive the default hundred on create and update',async()=>{
+    await boot();
+    const award=await call('POST','/v1/award',{shop_id:1,price:[],type:'s'});
+    expect(award.price).toBe(100);
+    await call('PATCH','/v1/award/:id',{price:250},{},{id:String(award.id)});
+    expect((await call('PATCH','/v1/award/:id',{price:[]},{},{id:String(award.id)})).price).toBe(100);
   });
   test('record device expansion obeys nested fields without exposing the full row',async()=>{
     await boot();const row=await db.insert('record',{device_id:1,player_id:2,game:{points:1,secodes:60}});

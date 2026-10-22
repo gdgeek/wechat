@@ -1,8 +1,9 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { createCipheriv, generateKeyPairSync, sign, verify } from 'node:crypto';
 import { ApiRouter } from '../src/core/router';
 import type { Context, Row, Services } from '../src/core/contracts';
 import { Integrations, registerIntegrations } from '../src/integrations/integrations';
+import type { IntegrationOptions } from '../src/integrations/integrations';
 
 const keys = generateKeyPairSync('rsa', { modulusLength: 2048 });
 const now = 1800000000;
@@ -12,9 +13,9 @@ function signedResponse(body: Row, status = 200) {
   const raw = JSON.stringify(body);
   return new Response(raw, { status, headers: { 'wechatpay-serial': 'platform-key', 'wechatpay-timestamp': String(now), 'wechatpay-nonce': 'response-nonce', 'wechatpay-signature': sign('RSA-SHA256', Buffer.from(`${now}\nresponse-nonce\n${raw}\n`), keys.privateKey).toString('base64') } });
 }
-function setup() {
+function setup(overrides: Partial<IntegrationOptions> = {}) {
   const requests: Array<{ url: URL; method: string; body?: Row }> = [];
-  const api = new Integrations({ ...config, fetch: async (input, init) => {
+  const api = new Integrations({ ...config, ...overrides, fetch: async (input, init) => {
     const url = new URL(String(input));
     const method = init?.method || 'GET';
     const body = init?.body ? JSON.parse(String(init.body)) : undefined;
@@ -27,11 +28,33 @@ function setup() {
   const router = new ApiRouter();
   const services = { integrations: api, auth: { bearer: async () => ({ id: 1 }) } } as unknown as Services;
   registerIntegrations(router, services);
-  const call = async (method: string, path: string, body: Row = {}, query: Row = {}, rawBody = '', headers: Row = {}) => router.match(method, path)!.route.handler({ body, query, params: {}, req: { headers, rawBody: Buffer.from(rawBody) }, res: {} } as unknown as Context);
+  const call = async (method: string, path: string, body: Row = {}, query: Row = {}, rawBody = '', headers: Row = {}) => router.match(method, path)!.route.handler({ body, query, params: {}, req: { headers, rawBody: Buffer.from(rawBody), protocol: 'https', get: () => 'legacy.example.test' }, res: {} } as unknown as Context);
   return { requests, call };
 }
 
 describe('payment endpoints with cryptographic provider transport', () => {
+  it('derives the original callback from the request when no new URL configuration is supplied', async () => {
+    try {
+      vi.stubEnv('PUBLIC_ORIGIN', undefined);
+      vi.stubEnv('WECHAT_PAY_NOTIFY_URL', undefined);
+      const { requests, call } = setup({ notifyUrl: undefined });
+      for (const version of ['v1', 'v2']) {
+        expect(await call('POST', `/${version}/wechat-pay/wxpay-order`, { openid: 'payer', out_trade_no: 'order01', amount: 100 })).toMatchObject({ code: 0 });
+        // Both frozen Yii controllers use the v1 notification action.
+        expect(requests.at(-1)?.body?.notify_url).toBe('https://legacy.example.test/v1/wechat-pay/notify');
+      }
+    } finally { vi.unstubAllEnvs(); }
+  });
+
+  it('prefers the configured public origin over the incoming request origin for callback URLs', async () => {
+    try {
+      vi.stubEnv('PUBLIC_ORIGIN', 'https://public.example.test/');
+      const { requests, call } = setup({ notifyUrl: undefined });
+      expect(await call('POST', '/v2/wechat-pay/wxpay-order', { openid: 'payer', out_trade_no: 'order01', amount: 100 })).toMatchObject({ code: 0 });
+      expect(requests.at(-1)?.body?.notify_url).toBe('https://public.example.test/v1/wechat-pay/notify');
+    } finally { vi.unstubAllEnvs(); }
+  });
+
   it('orders and queries through signed APIv3 and preserves v1/v2 response shape', async () => {
     const { requests, call } = setup();
     for (const version of ['v1', 'v2']) {

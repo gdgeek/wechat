@@ -1,12 +1,32 @@
 import { describe, expect, it } from 'vitest';
 import { createRouter, createServices } from '../src/application';
 import { ApiRouter } from '../src/core/router';
-import { auditRoutes, loadSnapshot, validateSnapshot } from '../scripts/check-parity';
+import { auditRoutes, loadSnapshot, validateSnapshot, validateSourceCheckout } from '../scripts/check-parity';
+import { createHash } from 'node:crypto';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync, unlinkSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 describe('source-derived HTTP route parity', () => {
+  it('checks actual source files and detects changed, missing and newly added backend code', () => {
+    const root = mkdtempSync(join(tmpdir(), 'wechat-source-freshness-'));
+    try {
+      mkdirSync(join(root, 'api/components'), { recursive: true });
+      const file = 'api/components/Source.php', source = '<?php // source';
+      writeFileSync(join(root, file), source);
+      const manifest = { files: { [file]: createHash('sha256').update(source).digest('hex') }, sourceScope: ['api/components'] };
+      expect(validateSourceCheckout(root, manifest)).toEqual([]);
+      writeFileSync(join(root, file), '<?php // changed');
+      expect(validateSourceCheckout(root, manifest)).toContain(`Source changed: ${file}`);
+      writeFileSync(join(root, 'api/components/New.php'), '<?php // newly added');
+      expect(validateSourceCheckout(root, manifest)).toContain('Source not captured: api/components/New.php');
+      unlinkSync(join(root, file));
+      expect(validateSourceCheckout(root, manifest)).toContain(`Source missing: ${file}`);
+    } finally { rmSync(root, { recursive: true, force: true }); }
+  });
   it('retains independent source declarations, missing actions and Yii inherited REST rules', () => {
     const snapshot = loadSnapshot();
-    expect(snapshot.summary).toMatchObject({ declaredMethodPaths: 486, resolvable: 250, businessAndRest: 184, optionsFallbacks: 66, missingAction: 220, missingController: 16 });
+    expect(snapshot.summary).toMatchObject({ declaredMethodPaths: 488, resolvable: 252, businessAndRest: 186, optionsFallbacks: 66, missingAction: 220, missingController: 16 });
     expect(snapshot.routes.find(row => row.method === 'GET' && row.path === '/v1/manager/login')).toMatchObject({ sourceStatus: 'missing-controller' });
     expect(snapshot.routes.find(row => row.method === 'GET' && row.path === '/v1/system/ready')).toMatchObject({ sourceStatus: 'missing-action' });
     expect(snapshot.routes.find(row => row.method === 'GET' && row.path === '/v2/wechat/info')).toMatchObject({ sourceStatus: 'missing-action' });
@@ -23,7 +43,7 @@ describe('source-derived HTTP route parity', () => {
       expect(audit.missing, 'A missing source route must be implemented or reported; never remove it from the source snapshot.').toEqual([]);
       expect(audit.unexplainedExtras).toEqual([]);
       expect(audit.unexpected404Changes).toEqual([]);
-      expect(audit.covered).toHaveLength(250);
+      expect(audit.covered).toHaveLength(252);
       expect(audit.preserved404).toHaveLength(236);
       // Source UrlRule declares delete, but FileController removes the action.
       // Probe the registered preservation without issuing database/provider I/O.

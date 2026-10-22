@@ -1,0 +1,5 @@
+# Optional: join the existing network containing Yii's database/Redis/Y1 services.
+networks:
+  default:
+    external: true
+    name: ${BACKEND_NETWORK:-proxy}

@@ -44,9 +44,18 @@ export function registerIntegrations(router: ApiRouter, services: Services): voi
   });
   router.add('POST', '/v2/wechat/bind-phone', async ctx => {
     let user = await auth.bearer(ctx, 'v2-user');
-    const phone = await api.phone(ctx.body.code);
-    if (user.tel !== phone.phoneNumber) user = await db.update('user', user.id, { tel: phone.phoneNumber });
-    user = await auth.role(user);
+    if (!ctx.body.code) return bad('code parameter is required');
+    let phone: Row;
+    try { phone = await api.phone(ctx.body.code); }
+    catch (error) {
+      return bad(`bind phone failed: ${error instanceof HttpException ? error.message : 'getuserphonenumber failed'}`);
+    }
+    try {
+      if (user.tel !== phone.phoneNumber) user = await db.update('user', user.id, { tel: phone.phoneNumber });
+      user = await auth.role(user);
+    } catch {
+      return bad('bind phone failed: Failed to save phone number');
+    }
     return success({ user: userFields(user), phone: phone.phoneNumber, purePhone: phone.purePhoneNumber ?? null, countryCode: phone.countryCode ?? null });
   });
   router.add('POST', '/v1/we-chat/openid', async ctx => {
@@ -68,7 +77,11 @@ export function registerIntegrations(router: ApiRouter, services: Services): voi
       if (!nonempty(input.out_trade_no)) return { code: 400, message: '缺少商户订单号参数' };
       if (!numeric(input.amount) || Number(input.amount) <= 0 || !Number.isSafeInteger(Math.trunc(Number(input.amount)))) return { code: 400, message: '金额参数不正确' };
       if (!/^[A-Za-z0-9_-]{6,32}$/.test(input.out_trade_no)) return { code: 400, message: '商户订单号格式不正确，要求6-32位字母数字或下划线' };
-      try { return { code: 0, data: await api.order({ ...input, amount: Math.trunc(Number(input.amount)) }) }; }
+      try {
+        // Both Yii versions generated the v1 callback from the current request.
+        const notifyUrl = api.config.notifyUrl || `${issuer(ctx).replace(/\/$/, '')}/v1/wechat-pay/notify`;
+        return { code: 0, data: await api.order({ ...input, amount: Math.trunc(Number(input.amount)) }, notifyUrl) };
+      }
       catch { return { code: 500, message: '支付下单失败' }; }
     });
     router.add('GET', `${prefix}/wxpay-query-order-by-out-trade-no`, async ctx => {

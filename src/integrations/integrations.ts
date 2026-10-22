@@ -13,7 +13,10 @@ export interface IntegrationOptions {
 }
 
 function pem(value: string | undefined, path: string | undefined): string | undefined {
-  return value ? value.replace(/\\n/g, '\n') : path ? readFileSync(path, 'utf8') : undefined;
+  if (value) return value.replace(/\\n/g, '\n');
+  if (!path) return undefined;
+  // EasyWeChat accepts either a PEM value or a file path in the legacy variables.
+  return path.trimStart().startsWith('-----BEGIN ') ? path.replace(/\\n/g, '\n') : readFileSync(path, 'utf8');
 }
 function environment(): IntegrationOptions {
   const env = process.env;
@@ -21,7 +24,7 @@ function environment(): IntegrationOptions {
   const key = pem(env.WECHAT_PAY_PLATFORM_PUBLIC_KEY, env.WECHAT_PAY_PLATFORM_PUBLIC_KEY_PATH || env.WECHAT_PUB_KEY);
   const publicKeyId = env.WECHAT_PAY_PLATFORM_SERIAL_NO || env.WECHAT_PUB_KEY_ID;
   if (key && publicKeyId && (!keys[publicKeyId] || env.WECHAT_PAY_PLATFORM_PUBLIC_KEY || env.WECHAT_PAY_PLATFORM_PUBLIC_KEY_PATH)) keys[publicKeyId] = key;
-  const serialNo = env.WECHAT_PAY_SERIAL_NO || (env.WECHAT_CERTIFICATE ? new X509Certificate(readFileSync(env.WECHAT_CERTIFICATE)).serialNumber : undefined);
+  const serialNo = env.WECHAT_PAY_SERIAL_NO || (env.WECHAT_CERTIFICATE ? new X509Certificate(pem(undefined, env.WECHAT_CERTIFICATE)!).serialNumber : undefined);
   return {
     appId: env.WECHAT_APP_ID, appSecret: env.WECHAT_APP_SECRET || env.WECHAT_SECRET,
     mchId: env.WECHAT_PAY_MCH_ID || env.WECHAT_MCH_ID, serialNo,
@@ -138,11 +141,13 @@ export class Integrations {
     return result;
   }
 
-  async order(input: Row): Promise<Row> {
-    this.required('appId', 'notifyUrl');
+  async order(input: Row, fallbackNotifyUrl?: string): Promise<Row> {
+    this.required('appId');
+    const notifyUrl = this.config.notifyUrl || fallbackNotifyUrl;
+    if (!notifyUrl) return failure(503, '外部服务配置不完整');
     const result = await this.payment('POST', '/v3/pay/transactions/jsapi', {
       appid: this.config.appId, mchid: this.config.mchId, description: input.description || '商品支付',
-      out_trade_no: input.out_trade_no, notify_url: this.config.notifyUrl,
+      out_trade_no: input.out_trade_no, notify_url: notifyUrl,
       amount: { total: Number(input.amount), currency: 'CNY' }, payer: { openid: input.openid },
     });
     if (typeof result.prepay_id !== 'string' || !result.prepay_id) return failure(502, '获取prepay_id失败');

@@ -5,7 +5,7 @@ import type { INestApplication } from '@nestjs/common';
 import express, { type Request, type Response } from 'express';
 import { dirname } from 'node:path';
 import { Database } from './core/database';
-import { LegacyRedis } from './core/redis';
+import { adminRedisOptions, LegacyRedis } from './core/redis';
 import { AuthService } from './core/auth';
 import { ApiRouter } from './core/router';
 import { ApiError, errorPayload } from './core/errors';
@@ -19,7 +19,7 @@ import { registerV2 } from './v2';
 
 export function createServices(): Services {
   const db = new Database();
-  return { db, redis: new LegacyRedis(), auth: new AuthService(db), catalog: new SceneCatalog(), integrations: new Integrations() };
+  return { db, redis: new LegacyRedis(), adminAuthRedis: new LegacyRedis(adminRedisOptions()), auth: new AuthService(db), catalog: new SceneCatalog(), integrations: new Integrations() };
 }
 export function createRouter(s: Services): ApiRouter {
   const router = new ApiRouter();
@@ -102,7 +102,8 @@ class CompatibilityController {
 
 export async function createApplication(services = createServices()): Promise<INestApplication> {
   const router = createRouter(services);
-  @Module({ controllers: [CompatibilityController], providers: [{ provide: 'API_ROUTER', useValue: router }] })
+  @Module({ controllers: [CompatibilityController], providers: [{ provide: 'API_ROUTER', useValue: router },
+    { provide: 'ADMIN_REDIS_LIFECYCLE', useValue: { onModuleDestroy: () => services.adminAuthRedis?.close() } }] })
   class ApplicationModule {}
   const app = await NestFactory.create(ApplicationModule, { logger: process.env.NODE_ENV === 'test' ? false : ['error', 'warn', 'log'], bodyParser: false });
   const server = app.getHttpAdapter().getInstance() as express.Express;

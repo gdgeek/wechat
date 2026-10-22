@@ -43,13 +43,15 @@ async function publicUser(s: Services, row: Row, fields: string[]): Promise<Row>
   if (['15000159790', '15601920021'].includes(row.tel)) role = 'root';
   else role = await s.db.one('SELECT * FROM control WHERE user_id = ?', [row.id]) ? 'manager' : 'user';
   if (row.role !== role) await s.db.update('user', row.id, { role });
-  const allowed = fields.length ? rootNames(fields) : new Set(['id', 'tel', 'nickname', 'avatar', 'role']);
+  const requested = rootNames(fields);
+  const allowed = fields.length && !requested.has('*') ? requested : new Set(['id', 'tel', 'nickname', 'avatar', 'role']);
   return Object.fromEntries(['id', 'tel', 'nickname', 'avatar', 'role'].filter(key => allowed.has(key)).map(key => [key, key === 'role' ? role : row[key] ?? null]));
 }
 export async function serialize(s: Services, resource: Resource, row: Row, query: Row = {}): Promise<Row> {
   row = hydrate(row);
-  const fields = csv(query.fields).includes('*') ? [] : csv(query.fields), expands = csv(query.expand);
-  const selected = fields.length ? rootNames(fields) : new Set(columns[resource]);
+  const fields = csv(query.fields), expands = csv(query.expand);
+  const requested = rootNames(fields);
+  const selected = fields.length && !requested.has('*') ? requested : new Set(columns[resource]);
   const output: Row = {};
   for (const key of columns[resource]) if (selected.has(key)) output[key] = row[key] ?? null;
   if (resource === 'device') {

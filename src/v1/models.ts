@@ -11,7 +11,7 @@ const definitions: Record<string, {fields:string[]; required?:string[]; integers
   player:{fields:['tel','nickname','openId','avatar','info','recharge','give','cost','times','grade','points','created_at','updated_at'],required:['tel'],integers:['times','grade','points'],numbers:['recharge','cost','give'],strings:['tel','nickname','openId','avatar'],unique:['tel','openId']},
   device:{fields:['shop_id','uuid','tag','ip','created_at','updated_at'],integers:['shop_id'],strings:['uuid','tag','ip'],unique:['uuid','tag'],foreign:{shop_id:'shop'}},
   shop:{fields:['price','play_time','rate','advanced','tag','created_at','updated_at'],integers:['price','play_time','rate','advanced'],strings:['tag']},
-  record:{fields:['player_id','device_id','created_at','updated_at','startTime','endTime','game','status'],required:['player_id','device_id'],integers:['player_id','device_id'],strings:['status'],foreign:{device_id:'device',player_id:'player'}},
+  record:{fields:['player_id','device_id','created_at','updated_at','startTime','endTime','game','status'],required:['player_id'],integers:['player_id','device_id'],strings:['status'],foreign:{device_id:'device',player_id:'player'}},
   award:{fields:['shop_id','price','type'],required:['shop_id'],integers:['shop_id','price'],strings:['type'],foreign:{shop_id:'shop'}},
   gift:{fields:['award_id','created_at','updated_at','info','uuid','tag','picture'],required:['award_id'],integers:['award_id'],strings:['uuid','tag','picture'],unique:['uuid'],foreign:{award_id:'award'}},
 };
@@ -61,25 +61,32 @@ export class V1Models {
     const spec=definitions[table]; if (!spec) fail(404,'Not Found');
     const data=Object.fromEntries(Object.entries(body).filter(([key]) => spec.fields.includes(key)));
     const awardPrice=data.price === undefined ? previous?.price : data.price;
-    if (table === 'award' && (awardPrice === undefined || awardPrice === null || awardPrice === '')) data.price=100;
+    if (table === 'award' && (awardPrice === undefined || awardPrice === null || awardPrice === '' || Array.isArray(awardPrice) && awardPrice.length === 0)) data.price=100;
     const merged={...previous,...data}, errors:Row[]=[];
-    const invalid=(field:string,message:string) => errors.push({field,message});
-    for (const field of spec.required ?? []) if (merged[field] === undefined || merged[field] === null || merged[field] === '') invalid(field,field+' cannot be blank.');
-    for (const field of spec.integers ?? []) if (data[field] !== undefined && data[field] !== null && data[field] !== '') {
-      if (!/^[+-]?\d+$/.test(String(data[field])) || !Number.isSafeInteger(Number(data[field]))) invalid(field,field+' must be an integer.'); else data[field]=Number(data[field]);
+    const hasError=(field:string) => errors.some(error => error.field === field);
+    const invalid=(field:string,message:string) => {if (!hasError(field)) errors.push({field,message});};
+    const empty=(value:any) => value === undefined || value === null || value === '' || Array.isArray(value) && value.length === 0;
+    const required=[...spec.required ?? []];
+    if (table === 'record' && (!previous || previous.device_id !== null)) required.push('device_id');
+    for (const field of required) if (empty(merged[field])) invalid(field,field+' cannot be blank.');
+    for (const field of spec.integers ?? []) if (!hasError(field) && data[field] !== undefined && data[field] !== null && data[field] !== '') {
+      // Yii skips optional empty arrays during validation, then casts numeric columns to zero.
+      if (Array.isArray(data[field]) && data[field].length === 0) data[field]=0;
+      if (!['number','string'].includes(typeof data[field]) || !/^[+-]?\d+$/.test(String(data[field])) || !Number.isSafeInteger(Number(data[field]))) invalid(field,field+' must be an integer.'); else data[field]=Number(data[field]);
     }
-    for (const field of spec.numbers ?? []) if (data[field] !== undefined && data[field] !== null && data[field] !== '') {
-      if (!Number.isFinite(Number(data[field]))) invalid(field,field+' must be a number.'); else data[field]=Number(data[field]);
+    for (const field of spec.numbers ?? []) if (!hasError(field) && data[field] !== undefined && data[field] !== null && data[field] !== '') {
+      if (Array.isArray(data[field]) && data[field].length === 0) data[field]=0;
+      if (!['number','string'].includes(typeof data[field]) || !/^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$/.test(String(data[field])) || !Number.isFinite(Number(data[field]))) invalid(field,field+' must be a number.'); else data[field]=Number(data[field]);
     }
-    for (const field of spec.strings ?? []) if (data[field] != null) {
+    for (const field of spec.strings ?? []) if (!hasError(field) && data[field] != null) {
       if (typeof data[field] !== 'string') invalid(field,field+' must be a string.');
       else if (field !== 'status' && field !== 'type' && [...data[field]].length > 255) invalid(field,field+' should contain at most 255 characters.');
     }
-    for (const field of spec.unique ?? []) if (data[field] != null && data[field] !== '') {
+    for (const field of spec.unique ?? []) if (!hasError(field) && !empty(data[field])) {
       const existing=await this.where(table,field,data[field]); if (existing && existing.id !== previous?.id) invalid(field,field+' has already been taken.');
     }
-    for (const [field,target] of Object.entries(spec.foreign ?? {})) if (merged[field] != null && merged[field] !== '' && !await this.find(target,merged[field])) invalid(field,field+' is invalid.');
-    if (table === 'award' && merged.shop_id != null && merged.type != null) {
+    for (const [field,target] of Object.entries(spec.foreign ?? {})) if (!hasError(field) && !empty(merged[field]) && !await this.find(target,merged[field])) invalid(field,field+' is invalid.');
+    if (table === 'award' && !hasError('shop_id') && !hasError('type') && !empty(merged.shop_id) && !empty(merged.type)) {
       const existing=await this.db.one('SELECT * FROM award WHERE shop_id = ? AND type = ?',[merged.shop_id,merged.type]);
       if (existing && existing.id !== previous?.id) invalid('type','The combination of shop_id and type has already been taken.');
     }
@@ -101,11 +108,11 @@ export class V1Models {
     const page=Math.max(1,Math.min(Math.max(1,pageCount),Number.isFinite(requestedPage) ? Math.floor(requestedPage) : 1));
     let sort='';
     if (ctx.query.sort) {
-      const allowed=['id',...definitions[table].fields];
+      const allowed=(await this.db.columns(table)).map(column => column.name);
       const clauses=String(ctx.query.sort).split(',').filter(Boolean).flatMap(field => {
         const desc=field.startsWith('-'), name=desc ? field.slice(1) : field;
         return allowed.includes(name) ? ['`'+name+'` '+(desc?'DESC':'ASC')] : [];
-      });
+      }).slice(0,1);
       if (clauses.length) sort=' ORDER BY '+clauses.join(',');
     }
     ctx.res.setHeader('X-Pagination-Total-Count',String(total));ctx.res.setHeader('X-Pagination-Page-Count',String(pageCount));

@@ -1,4 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { createRouter, createServices } from '../src/application';
 import type { ApiRouter } from '../src/core/router';
@@ -56,6 +57,25 @@ export interface RouteAudit {
 }
 
 const project = resolve(__dirname, '..');
+interface SourceManifest { files: Record<string, string>; sourceScope?: string[]; }
+export function validateSourceCheckout(root: string, manifest: SourceManifest = JSON.parse(readFileSync(resolve(project, 'docs/source-manifest.json'), 'utf8'))): string[] {
+  const issues: string[] = [];
+  for (const [file, expected] of Object.entries(manifest.files)) {
+    const path = resolve(root, file);
+    if (!existsSync(path)) issues.push(`Source missing: ${file}`);
+    else if (createHash('sha256').update(readFileSync(path)).digest('hex') !== expected) issues.push(`Source changed: ${file}`);
+  }
+  function walk(directory: string): void {
+    if (!existsSync(resolve(root, directory))) return;
+    for (const entry of readdirSync(resolve(root, directory), { withFileTypes: true })) {
+      const file = `${directory}/${entry.name}`;
+      if (entry.isDirectory()) walk(file);
+      else if (entry.isFile() && file.endsWith('.php') && !manifest.files[file]) issues.push(`Source not captured: ${file}`);
+    }
+  }
+  for (const directory of manifest.sourceScope ?? ['api/components', 'api/controllers', 'api/migrations', 'api/modules']) walk(directory);
+  return issues;
+}
 const normalize = (path: string) => path.replace(/:[A-Za-z_][\w]*/g, '{}').replace(/\{[^}]+\}/g, '{}').replace(/\/$/, '') || '/';
 const key = (method: string, path: string) => `${method.toUpperCase()} ${normalize(path)}`;
 
@@ -160,7 +180,11 @@ export async function checkParity(): Promise<{ provenanceIssues: string[]; audit
 async function main(): Promise<void> {
   const result = await checkParity();
   const { audit } = result;
-  if (process.argv.includes('--json')) process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
+  const rootIndex = process.argv.indexOf('--source-root');
+  if (rootIndex !== -1 && (!process.argv[rootIndex + 1] || process.argv[rootIndex + 1].startsWith('--'))) throw new Error('--source-root requires a Yii checkout path');
+  const sourceRoot = rootIndex === -1 ? process.env.YII_SOURCE_ROOT : process.argv[rootIndex + 1];
+  const sourceIssues = sourceRoot ? validateSourceCheckout(sourceRoot) : [];
+  if (process.argv.includes('--json')) process.stdout.write(`${JSON.stringify({ ...result, sourceRoot: sourceRoot ?? null, sourceIssues }, null, 2)}\n`);
   else {
     process.stdout.write(`Source-resolvable method/path pairs: ${audit.covered.length + audit.missing.length}; covered: ${audit.covered.length}; missing: ${audit.missing.length}\n`);
     process.stdout.write(`Source 404 declarations retained: ${audit.preserved404.length}; documented adaptations: ${audit.documentedAdaptations.length}; unexpected 404 changes: ${audit.unexpected404Changes.length}; unexplained extras: ${audit.unexplainedExtras.length}\n`);
@@ -170,7 +194,9 @@ async function main(): Promise<void> {
     for (const row of audit.unexpected404Changes) process.stderr.write(`CHANGED SOURCE 404 ${row.method} ${row.path}\n`);
     for (const row of audit.unexplainedExtras) process.stderr.write(`UNEXPLAINED EXTRA ${row.method} ${row.path}\n`);
     for (const row of audit.unexpectedVerbChanges) process.stderr.write(`CHANGED UNCONFIGURED METHOD ${row.method} ${row.path}\n`);
+    process.stdout.write(sourceRoot ? `Current Yii source freshness: ${sourceIssues.length ? 'changed' : 'verified'}\n` : 'Current Yii source freshness: not checked (use --source-root <Yii checkout>)\n');
+    for (const issue of sourceIssues) process.stderr.write(`${issue}\n`);
   }
-  if (result.provenanceIssues.length || audit.missing.length || audit.unexpected404Changes.length || audit.unexplainedExtras.length || audit.unexpectedVerbChanges.length) process.exitCode = 1;
+  if (sourceIssues.length || result.provenanceIssues.length || audit.missing.length || audit.unexpected404Changes.length || audit.unexplainedExtras.length || audit.unexpectedVerbChanges.length) process.exitCode = 1;
 }
 if (require.main === module) main().catch(error => { process.stderr.write(`Route parity check failed: ${error instanceof Error ? error.message : 'unknown error'}\n`); process.exitCode = 1; });

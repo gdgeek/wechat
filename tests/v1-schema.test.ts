@@ -3,8 +3,8 @@ import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { expect, test } from 'vitest';
 const root=resolve(__dirname,'..');
-const baseline=process.env.YII2_MIGRATIONS ?? '/private/tmp/wechat-yii2-baseline/api/migrations';
-test('legacy schema is generated from final safeUp state without historical dropped columns', () => {
+const baseline=process.env.YII2_MIGRATIONS ?? resolve(root,'../api/migrations');
+test('legacy schema is generated from final up state without historical dropped columns', () => {
   expect(existsSync(resolve(root,'scripts/generate-legacy-schema.php')),'The offline migration schema compiler must exist').toBe(true);
   const generated=readFileSync(resolve(root,'database/legacy-schema.sql'),'utf8');
   if (existsSync(baseline)) {
@@ -18,6 +18,11 @@ test('legacy schema is generated from final safeUp state without historical drop
   const setup=/CREATE TABLE[^;]*`setup` \(([\s\S]*?)\n\)/.exec(generated)![1];
   expect(setup).toContain('`shots` json');expect(setup).not.toContain('`shot`');
   expect(generated).toContain('CONSTRAINT `fk-control-device_id` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE CASCADE');
+  const record=/CREATE TABLE[^;]*`record` \(([\s\S]*?)\n\)/.exec(generated)![1];
+  expect(record).toContain('`device_id` int NULL');
+  expect(record).not.toContain('`device_id` int NOT NULL');
+  expect(generated).toContain('CONSTRAINT `fk_record_device_history_7fccfb527aaf981932ad1471f302a4ae` FOREIGN KEY (`device_id`) REFERENCES `device` (`id`) ON DELETE SET NULL');
+  expect(generated).not.toContain('CONSTRAINT `fk-record-device_id`');
   expect(generated).toContain('`status` ENUM(\'ready\', \'running\', \'finish\') NOT NULL DEFAULT \'ready\'');
   expect(generated).toContain('`type` ENUM(\'root\', \'admin\', \'director\', \'staff\') NOT NULL DEFAULT \'staff\'');
 });

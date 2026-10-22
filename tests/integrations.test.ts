@@ -2,7 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { mkdtempSync, writeFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { createCipheriv, generateKeyPairSync, sign, verify } from 'node:crypto';
+import { createCipheriv, generateKeyPairSync, sign, verify, X509Certificate } from 'node:crypto';
+import { rootCertificates } from 'node:tls';
 import { Integrations } from '../src/integrations/integrations';
 
 const merchant = generateKeyPairSync('rsa', { modulusLength: 2048 });
@@ -139,5 +140,25 @@ describe('provider integrations', () => {
       vi.stubEnv('COS_BUCKET', 'new-1250000000');
       expect(new Integrations().config).toMatchObject({ appSecret: 'new-secret', bucket: 'new-1250000000' });
     } finally { vi.unstubAllEnvs(); rmSync(directory, { recursive: true }); }
+  });
+
+  it('accepts an inline PEM in the existing Yii merchant private-key variable', () => {
+    try {
+      vi.stubEnv('WECHAT_PAY_PRIVATE_KEY', undefined);
+      vi.stubEnv('WECHAT_PAY_PRIVATE_KEY_PATH', undefined);
+      vi.stubEnv('WECHAT_PRIVATE_KEY', privateKey);
+      expect(new Integrations().config.privateKey).toBe(privateKey);
+    } finally { vi.unstubAllEnvs(); }
+  });
+
+  it('accepts inline PEMs in the existing Yii certificate and platform public-key variables', () => {
+    try {
+      for (const name of ['WECHAT_PAY_SERIAL_NO', 'WECHAT_PAY_PLATFORM_KEYS_JSON', 'WECHAT_PAY_PLATFORM_SERIAL_NO', 'WECHAT_PAY_PLATFORM_PUBLIC_KEY', 'WECHAT_PAY_PLATFORM_PUBLIC_KEY_PATH']) vi.stubEnv(name, undefined);
+      // A bundled public certificate exercises parsing without any merchant credentials.
+      vi.stubEnv('WECHAT_CERTIFICATE', rootCertificates[0]);
+      vi.stubEnv('WECHAT_PUB_KEY_ID', 'legacy-platform');
+      vi.stubEnv('WECHAT_PUB_KEY', platformKey);
+      expect(new Integrations().config).toMatchObject({ serialNo: new X509Certificate(rootCertificates[0]).serialNumber, platformKeys: { 'legacy-platform': platformKey } });
+    } finally { vi.unstubAllEnvs(); }
   });
 });

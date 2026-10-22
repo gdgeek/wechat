@@ -2,6 +2,16 @@ import { createHash } from 'node:crypto';
 import { createClient } from 'redis';
 import type { Row } from './contracts';
 
+export interface RedisConnectionOptions { host?: string; port?: number; database?: number; password?: string; url?: string; timeout?: number; }
+export function adminRedisOptions(env: NodeJS.ProcessEnv = process.env): RedisConnectionOptions {
+  const dedicated = ['HOST', 'PORT', 'DB', 'PASSWORD'].some(name => !!env[`ADMIN_AUTH_REDIS_${name}`]);
+  return { host: env.ADMIN_AUTH_REDIS_HOST || env.REDIS_HOST || '127.0.0.1',
+    port: Number(env.ADMIN_AUTH_REDIS_PORT || env.REDIS_PORT || 6379),
+    database: Number(env.ADMIN_AUTH_REDIS_DB || env.REDIS_DB || 0),
+    password: env.ADMIN_AUTH_REDIS_PASSWORD || env.REDIS_PASSWORD || undefined,
+    url: dedicated ? undefined : env.REDIS_URL, timeout: 1500 };
+}
+
 export function buildRedisKey(value: unknown): string {
   const key = String(value);
   return /^[-+]?\d+(?:\.\d+)?$/.test(key) || /^[a-zA-Z0-9]{1,32}$/.test(key) ? key : createHash('md5').update(key).digest('hex');
@@ -9,8 +19,9 @@ export function buildRedisKey(value: unknown): string {
 export class LegacyRedis {
   private readonly client;
   private connecting?: Promise<unknown>;
-  constructor() {
-    this.client = createClient({ url: process.env.REDIS_URL, socket: { host: process.env.REDIS_HOST ?? '127.0.0.1', port: Number(process.env.REDIS_PORT ?? 6379), connectTimeout: 3000, reconnectStrategy: false }, database: Number(process.env.REDIS_DB ?? 0), password: process.env.REDIS_PASSWORD || undefined });
+  constructor(private readonly options?: RedisConnectionOptions) {
+    const config = options ?? { url: process.env.REDIS_URL, host: process.env.REDIS_HOST, port: Number(process.env.REDIS_PORT ?? 6379), database: Number(process.env.REDIS_DB ?? 0), password: process.env.REDIS_PASSWORD || undefined };
+    this.client = createClient({ url: config.url, socket: { host: config.host ?? '127.0.0.1', port: config.port ?? 6379, connectTimeout: config.timeout ?? 3000, reconnectStrategy: false }, database: config.database ?? 0, password: config.password });
     this.client.on('error', () => { /* Request errors are sanitized at the HTTP boundary. */ });
   }
   async connect(): Promise<void> {
@@ -18,7 +29,7 @@ export class LegacyRedis {
     this.connecting ??= this.client.connect().finally(() => { this.connecting = undefined; });
     await this.connecting;
   }
-  async command(args: string[]): Promise<any> { await this.connect(); return this.client.sendCommand(args); }
+  async command(args: string[]): Promise<any> { await this.connect(); return this.client.sendCommand(args, this.options?.timeout ? { abortSignal: AbortSignal.timeout(this.options.timeout) } : undefined); }
   async ping(): Promise<string> { return this.command(['PING']); }
   async find(model: string, pk: unknown): Promise<Row | null> {
     const values = await this.command(['HGETALL', `${model}:a:${buildRedisKey(pk)}`]) as string[];

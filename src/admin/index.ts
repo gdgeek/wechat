@@ -1,41 +1,31 @@
-import bcrypt from 'bcryptjs';
-import type { Services } from '../core/contracts';
+import type { Context, Handler, Services } from '../core/contracts';
 import type { ApiRouter } from '../core/router';
 import { ApiError } from '../core/errors';
 import { AdminDevices } from './devices';
-import { BrowserSessions, equal, sha256, throttle } from './sessions';
 import { ScanTickets } from './tickets';
+import { AdminAuth } from './auth';
+import { AdminTokens } from './tokens';
+import { AdminTokenStore } from './token-store';
 
 export function registerAdmin(router: ApiRouter, s: Services): void {
-  const sessions = new BrowserSessions(s.db), tickets = new ScanTickets(s), devices = new AdminDevices(s);
-  router.add('GET', '/admin-api/session', ctx => sessions.run(ctx, async state => ({ user: await sessions.user(state), csrfToken: state.csrf, scanLoginEnabled: tickets.enabled() })));
-  router.add('POST', '/admin-api/login', ctx => sessions.run(ctx, async state => {
-    const { username, password } = ctx.body;
-    if (typeof username !== 'string' || typeof password !== 'string' || Buffer.byteLength(username) > 255 || Buffer.byteLength(password) > 1024) throw new ApiError(422, '请输入用户名和密码');
-    await throttle(s.db, ctx, `login:${ctx.req.ip}`, 5, 60, false);
-    const hash = process.env.ADMIN_PASSWORD_HASH || '$2y$12$3RAuTkI52n8qXYippmstTOyJbMslkfdtsRYghaxUSKlKP7g1u8c2.';
-    const valid = await bcrypt.compare(password, hash.replace(/^\$2y\$/, '$2b$'));
-    if (!equal(username, process.env.ADMIN_USERNAME || 'dirui') || !valid) {
-      await throttle(s.db, ctx, `login:${ctx.req.ip}`, 5, 60);
-      throw new ApiError(401, '用户名或密码错误');
-    }
-    await s.db.delete('node_rate_limit', sha256(`login:${ctx.req.ip}`));
-    await tickets.cancelCurrent(state);
-    state.identity = { source: 'password', username, expiresAt: Math.floor(Date.now() / 1000) + 28800 };
-    state.rotate = true;
-    return { user: { username, role: 'admin' }, csrfToken: state.csrf };
-  }));
-  router.add('POST', '/admin-api/logout', ctx => sessions.run(ctx, async state => { await tickets.cancelCurrent(state); delete state.identity; state.rotate = true; return { user: null, csrfToken: state.csrf }; }));
-  router.add('GET', '/admin-api/devices', ctx => sessions.run(ctx, async state => devices.list(await sessions.scope(state))));
-  router.add('GET', '/admin-api/games', ctx => sessions.run(ctx, async state => { await sessions.scope(state); return s.catalog.getGames(); }));
-  router.add('PUT', '/admin-api/devices/:id/game', ctx => sessions.run(ctx, async state => devices.update(Number(ctx.params.id), { gameId: ctx.body.gameId }, await sessions.scope(state))));
-  router.add('PUT', '/admin-api/devices/:id/configuration', ctx => sessions.run(ctx, async state => devices.update(Number(ctx.params.id), ctx.body, await sessions.scope(state))));
-  router.add('POST', '/admin-api/scan-login/tickets', ctx => sessions.run(ctx, async state => tickets.create(ctx, state)));
-  router.add('GET', '/admin-api/scan-login/tickets/:id', ctx => sessions.run(ctx, async state => tickets.status(ctx.params.id, state)));
-  router.add('POST', '/admin-api/scan-login/tickets/:id/cancel', ctx => sessions.run(ctx, async state => tickets.cancel(ctx.params.id, state)));
-  router.add('POST', '/admin-api/scan-login/tickets/:id/consume', ctx => sessions.run(ctx, async state => ({ user: await tickets.consume(ctx.params.id, state), csrfToken: state.csrf })));
-  router.add('POST', '/v2/web-login/tickets/:id/approve', async ctx => {
-    ctx.res.setHeader('Cache-Control', 'no-store');
+  const tokens = new AdminTokens(new AdminTokenStore(s.adminAuthRedis ?? s.redis));
+  const auth = new AdminAuth(s.db, tokens), tickets = new ScanTickets(s, auth), devices = new AdminDevices(s);
+  const route = (method: string, path: string, operation: Handler) => router.add(method, path, ctx => { ctx.res.setHeader('Cache-Control', 'no-store'); return operation(ctx); });
+  const requireUser = async (ctx: Context) => { if (!await auth.user(ctx)) throw new ApiError(401, '请先登录管理后台'); };
+  route('GET', '/admin-api/session', async ctx => ({ user: await auth.user(ctx), scanLoginEnabled: tickets.enabled(), authMode: 'jwt' }));
+  route('POST', '/admin-api/login', ctx => auth.login(ctx, () => tickets.cancelCurrent(ctx)));
+  route('POST', '/admin-api/refresh', ctx => auth.refresh(ctx.body.refreshToken));
+  route('POST', '/admin-api/logout', ctx => auth.logout(ctx, () => tickets.cancelCurrent(ctx)));
+  route('GET', '/admin-api/devices', async ctx => { await requireUser(ctx); return devices.list(await auth.scope(ctx)); });
+  route('DELETE', '/admin-api/devices/:id', async ctx => { await requireUser(ctx); return devices.deleteDevice(Number(ctx.params.id), await auth.scope(ctx)); });
+  route('GET', '/admin-api/games', async ctx => { await requireUser(ctx); return s.catalog.getGames(); });
+  route('PUT', '/admin-api/devices/:id/game', async ctx => { await requireUser(ctx); return devices.update(Number(ctx.params.id), { gameId: ctx.body.gameId }, await auth.scope(ctx)); });
+  route('PUT', '/admin-api/devices/:id/configuration', async ctx => { await requireUser(ctx); return devices.update(Number(ctx.params.id), ctx.body, await auth.scope(ctx)); });
+  route('POST', '/admin-api/scan-login/tickets', ctx => tickets.create(ctx));
+  route('GET', '/admin-api/scan-login/tickets/:id', ctx => tickets.status(ctx));
+  route('POST', '/admin-api/scan-login/tickets/:id/cancel', ctx => tickets.cancel(ctx));
+  route('POST', '/admin-api/scan-login/tickets/:id/consume', ctx => tickets.consume(ctx));
+  route('POST', '/v2/web-login/tickets/:id/approve', async ctx => {
     if (typeof ctx.body.secret !== 'string' || !/^[a-f0-9]{64}$/.test(ctx.body.secret)) throw new ApiError(422, '扫码登录凭据格式无效');
     return { success: true, message: '已确认管理后台登录', data: await tickets.approve(ctx) };
   });

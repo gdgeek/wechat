@@ -35,6 +35,12 @@ class MemoryDb {
   async one(sql: string, params: any[] = []) { return (await this.query(sql, params))[0] || null; }
   async insert(table: string, data: Row) { const row = { ...(table === 'setup' ? { money: 0 } : {}), id: Math.max(0, ...this.tables[table].map(r => Number(r.id))) + 1, ...structuredClone(data) }; this.tables[table].push(row); return structuredClone(row); }
   async update(table: string, id: any, data: Row) { const row = this.tables[table].find(r => String(r.id) === String(id)); if (!row) throw new Error('Row missing'); Object.assign(row, structuredClone(data)); return structuredClone(row); }
+  async execute(sql: string, params: any[] = []) {
+    if (!/^UPDATE device SET version = \? WHERE id = \?$/i.test(sql)) throw new Error(`Unsupported SQL ${sql}`);
+    const row = this.tables.device.find(r => String(r.id) === String(params[1]));
+    if (row) row.version = params[0];
+    return { affectedRows: row ? 1 : 0, insertId: 0 };
+  }
   async delete(table: string, id: any) { this.tables[table] = this.tables[table].filter(r => String(r.id) !== String(id)); }
   async transaction<T>(fn: (db: MemoryDb) => Promise<T>) { const original = structuredClone(this.tables); try { return await fn(this); } catch (error) { this.tables = original; throw error; } }
   async columns(table: string) { return [...new Set(this.tables[table].flatMap(Object.keys))].map(name => ({ name })); }
@@ -297,5 +303,71 @@ describe('v2 public scene pass-through', () => {
     expect(response.value).toEqual({ success: true, data: { items: [{ verse_id: 42, name: 'Y1' }] } });
     expect(f.services.catalog.forwardCheckin).toHaveBeenCalledOnce();
     expect(f.services.catalog.fetchScenes).not.toHaveBeenCalled();
+  });
+});
+
+describe('v2 Yii wildcard field compatibility', () => {
+  const setup = { id: 7, device_id: 1, title: 'Studio', money: 8 };
+  const user = { id: 1, tel: '123', nickname: 'Joe', avatar: 'avatar', role: 'manager', openid: 'secret' };
+  it('expands nested administrator wildcards to all public user fields', async () => {
+    const f = await fixture({ device: devices, control: controls, setup: [setup], user: [user] });
+    const response = await f.request('GET', '/v2/devices/1', {}, { expand: 'admin', fields: 'id,admin.*' });
+    expect(response.value).toEqual({ id: 1, admin: [{ id: 1, tel: '123', nickname: 'Joe', avatar: 'avatar', role: 'manager' }] });
+  });
+  it('retains nested field selections alongside a root wildcard', async () => {
+    const f = await fixture({ device: devices, control: controls, setup: [setup], user: [user] });
+    const response = await f.request('GET', '/v2/devices/1', {}, { expand: 'setup,admin', fields: '*,setup.title,admin.id' });
+    expect(response.value).toMatchObject({ id: 1, uuid: 'mine' });
+    expect(response.value.setup).toEqual({ title: 'Studio' });
+    expect(response.value.admin).toEqual([{ id: 1 }]);
+  });
+});
+
+describe('v2 current game device version reporting', () => {
+  it('stores explicit and omitted versions when device registration creates a device', async () => {
+    const f = await fixture();
+    await f.request('POST', '/v2/server/device', { token: 'explicit', uuid: 'explicit', version: 2 }, { expand: 'device' });
+    await f.request('POST', '/v2/server/refresh', { token: 'default', uuid: 'default' }, { expand: 'device' });
+    expect(f.db.tables.device.map(row => ({ uuid: row.uuid, version: row.version }))).toEqual([{ uuid: 'explicit', version: 2 }, { uuid: 'default', version: 0 }]);
+  });
+  it('synchronizes an existing bound report on every UUID login without touching timestamps', async () => {
+    const f = await fixture({ device: [{ id: 1, uuid: 'existing', version: 9, updated_at: '2026-10-22 12:00:00' }] });
+    await f.redis.save('report', { token: 'bound', uuid: 'existing', device_id: 1 });
+    for (const version of [0, '6', '0', '2147483647', '+2', ' 3 ', '-0', '\t\n\v\r1\t\n\v\r']) {
+      await f.request('POST', '/v2/server/device', { token: 'bound', uuid: 'existing', version }, { expand: 'device' });
+      expect(f.db.tables.device[0].version).toBe(Number(version) || 0);
+      expect(f.db.tables.device[0].updated_at).toBe('2026-10-22 12:00:00');
+    }
+    await f.request('POST', '/v2/server/refresh', { token: 'bound', uuid: 'existing' }, { version: 5, expand: 'device' });
+    expect(f.db.tables.device[0].version).toBe(0);
+    expect(f.db.tables.device).toHaveLength(1);
+  });
+  it('rejects invalid version bodies before creating or changing devices or Redis reports', async () => {
+    for (const version of [true, false, null, [], {}, -1, 1.5, '1.5', 2147483648, '2147483648', '', '01', '1e0', '0x1', '\f1\f']) {
+      const f = await fixture();
+      await expect(f.request('POST', '/v2/server/device', { token: 'invalid', uuid: 'invalid', version }, { expand: 'device' })).rejects.toMatchObject({ status: 400, message: 'version must be an integer between 0 and 2147483647' });
+      expect(f.db.tables.device).toEqual([]);
+      expect(await f.redis.find('report', 'invalid')).toBeNull();
+    }
+    const f = await fixture({ device: [{ id: 1, uuid: 'existing', version: 9 }] });
+    await f.redis.save('report', { token: 'bound', uuid: 'existing', device_id: 1, status: 'ready' });
+    await expect(f.request('POST', '/v2/server/refresh', { token: 'bound', uuid: 'existing', version: '\f1\f', status: 'running' })).rejects.toMatchObject({ status: 400 });
+    expect(f.db.tables.device[0].version).toBe(9);
+    expect((await f.redis.find('report', 'bound'))!.status).toBe('ready');
+  });
+  it('does not apply version validation or synchronization to file and applet refreshes', async () => {
+    const f = await fixture({ device: [{ id: 1, uuid: 'existing', version: 9 }] });
+    await f.redis.save('report', { token: 'bound', uuid: 'existing', device_id: 1 });
+    await f.request('POST', '/v2/server/file', { token: 'bound', key: 'read-only', version: null }, { expand: 'device' });
+    await f.request('POST', '/v2/applet/refresh', { token: 'bound', id: 'union', version: false }, { expand: 'device' });
+    expect(f.db.tables.device[0].version).toBe(9);
+  });
+  it('continues to reject invalid device signatures before version synchronization', async () => {
+    const f = await fixture({ device: [{ id: 1, uuid: 'existing', version: 9 }] });
+    f.services.auth = new AuthService(f.db as any, { devAuth: false });
+    const token = 'A0123456789abcdef0123456789abcdef';
+    await expect(f.request('POST', '/v2/server/device', { token, uuid: 'existing', version: 2 }, { time: '1000', hash: 'invalid' })).rejects.toMatchObject({ status: 400 });
+    expect(f.db.tables.device[0].version).toBe(9);
+    expect(await f.redis.find('report', token)).toBeNull();
   });
 });

@@ -33,6 +33,25 @@ export class AdminDevices {
       return await Promise.all(devices.map(async device => normalizeDevice(device, await this.services.db.one('SELECT * FROM setup WHERE device_id=? LIMIT 1', [device.id]))));
     } catch { throw new ApiError(503, '设备数据暂时不可用，请稍后重试'); }
   }
+  async deleteDevice(id: number, userId: number | null): Promise<Row> {
+    if (userId !== null) throw new ApiError(403, '仅管理员可以删除设备');
+    try {
+      return await this.services.db.transaction(async db => {
+        const device = await db.one('SELECT * FROM device WHERE id=? FOR UPDATE', [id]);
+        if (!device) throw new ApiError(404, '设备不存在');
+        const reference = (await db.columns('record')).find(column => column.name === 'device_id');
+        if (!reference?.nullable) throw new Error('Record preservation migration is required.');
+        const records = await db.query('SELECT id,status FROM record WHERE device_id=? FOR UPDATE', [id]);
+        if (records.some(record => record.status !== 'finish')) throw new ApiError(409, '设备仍有未结束的游戏，请先结束游戏后再删除');
+        // Bypass model timestamp behavior and detach history even if an old FK still cascades.
+        await db.execute('UPDATE record SET device_id=NULL WHERE device_id=?', [id]);
+        for (const table of ['setup', 'control', 'manager']) await db.execute(`DELETE FROM ${table} WHERE device_id=?`, [id]);
+        const deleted = await db.execute('DELETE FROM device WHERE id=?', [id]);
+        if (deleted.affectedRows !== 1) throw new Error('Device deletion did not remove its record.');
+        return { id, deleted: true };
+      });
+    } catch (error) { if (error instanceof ApiError) throw error; throw new ApiError(503, '设备暂时无法删除，请稍后重试'); }
+  }
   async update(id: number, input: unknown, userId: number | null): Promise<Row> {
     const patch = validateConfiguration(input);
     if ('gameId' in patch && !(await this.services.catalog.getGames()).some(game => game.id === patch.gameId)) throw new ApiError(422, '请选择游戏列表中的游戏');

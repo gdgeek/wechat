@@ -1,11 +1,18 @@
 import { describe, expect, it } from 'vitest';
-import { buildRedisKey } from '../src/core/redis';
+import { adminRedisOptions, buildRedisKey } from '../src/core/redis';
 import { ApiRouter } from '../src/core/router';
 import { AuthService } from '../src/core/auth';
 import jwt from 'jsonwebtoken';
 import type { Database } from '../src/core/database';
 
 describe('Yii compatibility primitives', () => {
+  it('uses a dedicated admin Redis connection without changing business Redis', () => {
+    const env = { REDIS_HOST: 'business', REDIS_PORT: '6379', REDIS_DB: '4', REDIS_PASSWORD: 'business-pass',
+      ADMIN_AUTH_REDIS_HOST: 'authentication', ADMIN_AUTH_REDIS_PORT: '6381', ADMIN_AUTH_REDIS_DB: '0', ADMIN_AUTH_REDIS_PASSWORD: 'admin-pass' };
+    expect(adminRedisOptions(env)).toMatchObject({ host: 'authentication', port: 6381, database: 0, password: 'admin-pass', timeout: 1500 });
+    expect(env.REDIS_DB).toBe('4');
+    expect(adminRedisOptions({ REDIS_HOST: 'business', REDIS_PORT: '6380', REDIS_DB: '4' })).toMatchObject({ host: 'business', port: 6380, database: 4 });
+  });
   it('uses Yii Redis key normalization including hashed long tokens', () => {
     expect(buildRedisKey('abc123')).toBe('abc123');
     expect(buildRedisKey('A' + '0'.repeat(32))).toBe('7591abb0d4fe2a429698e9b24612a95c');

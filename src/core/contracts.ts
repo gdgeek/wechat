@@ -17,6 +17,7 @@ export interface Context {
 export interface Services {
   db: Database;
   redis: LegacyRedis;
+  adminAuthRedis?: LegacyRedis;
   auth: AuthService;
   catalog: SceneCatalog;
   integrations: Integrations;

@@ -14,11 +14,11 @@ Modern names take precedence over the existing Yii variable names:
 | Mini program AppID | `WECHAT_APP_ID` | same |
 | Mini program secret | `WECHAT_APP_SECRET` | `WECHAT_SECRET` |
 | Merchant ID | `WECHAT_PAY_MCH_ID` | `WECHAT_MCH_ID` |
-| Merchant serial | `WECHAT_PAY_SERIAL_NO` | extracted from X.509 file `WECHAT_CERTIFICATE` |
-| Merchant private key | `WECHAT_PAY_PRIVATE_KEY` (PEM) / `WECHAT_PAY_PRIVATE_KEY_PATH` | `WECHAT_PRIVATE_KEY` (path) |
+| Merchant serial | `WECHAT_PAY_SERIAL_NO` | extracted from X.509 PEM/path `WECHAT_CERTIFICATE` |
+| Merchant private key | `WECHAT_PAY_PRIVATE_KEY` (PEM) / `WECHAT_PAY_PRIVATE_KEY_PATH` | `WECHAT_PRIVATE_KEY` (PEM/path) |
 | APIv3 key | `WECHAT_PAY_API_V3_KEY` | `WECHAT_SECRET_KEY` |
 | Platform public key ID | `WECHAT_PAY_PLATFORM_SERIAL_NO` | `WECHAT_PUB_KEY_ID` |
-| Platform public key | `WECHAT_PAY_PLATFORM_PUBLIC_KEY` (PEM) / `WECHAT_PAY_PLATFORM_PUBLIC_KEY_PATH` | `WECHAT_PUB_KEY` (path) |
+| Platform public key | `WECHAT_PAY_PLATFORM_PUBLIC_KEY` (PEM) / `WECHAT_PAY_PLATFORM_PUBLIC_KEY_PATH` | `WECHAT_PUB_KEY` (PEM/path) |
 | Tencent credentials | `TENCENT_SECRET_ID` / `TENCENT_SECRET_KEY` | `SECRET_ID` / `SECRET_KEY` |
 | COS bucket and region | `COS_BUCKET` / `COS_REGION` | `COS_BUCKETS_BUCKET` / `COS_BUCKETS_REGION` |
 
@@ -27,7 +27,9 @@ certificate serials to trusted PEM public keys/certificates. Configure both keys
 during rotation. Unknown serials are rejected; keys are never downloaded and
 trusted automatically. When a public key ID is configured it is also sent in the
 `Wechatpay-Serial` request header. `WECHAT_PAY_NOTIFY_URL` defaults to
-`PUBLIC_ORIGIN/v1/wechat-pay/notify`. `WECHAT_PAY_REFUND_NOTIFY_URL` is optional.
+`PUBLIC_ORIGIN/v1/wechat-pay/notify`. Without either URL setting, both v1 and v2
+orders derive `/v1/wechat-pay/notify` from the incoming request origin, matching
+the original Yii controllers. `WECHAT_PAY_REFUND_NOTIFY_URL` is optional.
 
 Signing credentials stay on the server. The client receives only mini program
 payment parameters, presigned object URLs, and scoped temporary STS credentials.
