@@ -5,7 +5,7 @@ This backend-only update compares against game HEAD `412ce84b7a6c3f33d0917e5be35
 ## Aligned contracts
 
 - All **250 source-resolvable method/path pairs** are registered, including the new authenticated device image-preview endpoint. The source's 239 missing-action/controller declarations and seven additional negative route probes remain unavailable.
-- HTTP responses preserve public Yii exception class names, status names, JSON/XML negotiation, HEAD content types, strict URL patterns, PHP path decoding, request method overrides, repeated parameter handling and lazy JSON errors after authentication. Unresolved routes return an HTML error page.
+- HTTP responses preserve public Yii exception class names, status names, JSON/XML negotiation, HEAD content types, strict URL patterns, PHP path decoding, request method overrides, repeated parameter handling and lazy JSON errors after authentication. Unresolved routes return an HTML error page with the source Cache-Control, Expires and Pragma cache policy, including HEAD.
 - Health checks return Shanghai timestamps and build-time formatting, validate Redis PONG, and bound both stalled handshakes and PING reads. Build commit and time continue to describe the actual Node image.
 - Admin device responses include version; previews sign only images saved on authorized devices within the configured COS bucket, using the original 300-second lifetime.
 - v1/v2 regressions cover model validation, search filters and wildcard escaping, PHP numeric/empty conversions, raw model create/update responses versus subsequent database reads, SQL timestamp-expression serialization, role updates and financial validation before writes.
@@ -39,4 +39,6 @@ No real customer charge/refund or physical device command is part of automated t
 
 ## Release evidence
 
-At 02:59 Asia/Shanghai, local MariaDB 11.4/Redis verification passed **730 tests in 24 files**, with no skipped tests. Build, all 250 routes, source freshness against both the frozen snapshot and current Yii checkout, and 441/441 actual PHP reference responses passed. CI requires all MariaDB 10.4, MariaDB 11.4 and MySQL 8.4 verification jobs to pass before publishing `wechat2`. The CI run, image identity and b0/b1 verification are recorded in the deployment record after publication.
+At 03:12 Asia/Shanghai, local MariaDB 11.4/Redis verification passed **736 tests in 24 files**, with no skipped tests. Build, all 250 routes, source freshness against both the frozen snapshot and current Yii checkout, and 441/441 actual PHP reference responses passed. CI requires all MariaDB 10.4, MariaDB 11.4 and MySQL 8.4 verification jobs to pass before publishing `wechat2`. The CI run, image identity and b0/b1 verification are recorded in the deployment record after publication.
+
+The first production comparison after commit `51fc10d767af19b33464f6bcde88ee51f8bbc18f` found two additional deployment-facing differences: HTML error responses lacked PHP session no-cache headers, and the Node Stacks had no Swagger credentials configured. The cache policy is now covered by six additional regressions. Swagger configuration migration requires the user’s authorization to reuse its existing credentials; it must not be marked complete while that authorization is pending. The first rollout alone is not treated as the final acceptance result.

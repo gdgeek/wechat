@@ -111,7 +111,12 @@ function sendResult(req: Request, res: Response, result: unknown, format: Respon
   else res.send(result === undefined || result === null ? '' : String(result));
 }
 
-function htmlError(body: any): string {
+function htmlError(body: any, res: Response): string {
+  // Yii's site/error layout reads session flashes, which emits PHP's nocache
+  // headers. Preserve the cache policy without creating a session or cookie.
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.setHeader('Expires', 'Thu, 19 Nov 1981 08:52:00 GMT');
+  res.setHeader('Pragma', 'no-cache');
   const title = escapeMarkup(`${body.name} (#${body.status})`);
   return `<!DOCTYPE html>\n<html lang="en-US"><head><meta charset="UTF-8"><title>${title}</title></head><body><main class="site-error"><h1>${title}</h1><div class="alert alert-danger">${escapeMarkup(body.message).replace(/\n/g, '<br>')}</div><p>The above error occurred while the Web server was processing your request.</p><p>Please contact us if you think this is a server error. Thank you.</p></main></body></html>`;
 }
@@ -160,7 +165,7 @@ class CompatibilityController {
       const isAdminDatabaseError = (resolvedPath.startsWith('/admin-api/') || resolvedPath.startsWith('/v2/web-login/')) && !!(error as any)?.sqlState;
       const result = errorPayload(isAdminDatabaseError ? new ApiError(503, '服务暂时不可用，请稍后重试') : error);
       res.status(result.status);
-      sendResult(req, res, format === 'html' ? htmlError(result.body) : result.body, format);
+      sendResult(req, res, format === 'html' ? htmlError(result.body, res) : result.body, format);
     }
   }
 }

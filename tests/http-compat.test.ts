@@ -40,6 +40,36 @@ describe('Yii HTTP boundary compatibility', () => {
     expect(response.text).toContain('Page not found.');
   });
 
+  it.each([
+    ['get', '/health/', 404],
+    ['get', '/unknown-route', 404],
+    ['get', '/v2/server/test?_format=csv', 406],
+    ['get', '/v2/server/test?_format[]=json', 400],
+    ['head', '/v2/server/test', 404],
+  ] as const)('preserves Yii HTML error cache headers for %s %s', async (method, path, status) => {
+    const response = await request[method](path).expect(status);
+    expect(response.headers['content-type']).toMatch(/^text\/html/);
+    expect(response.headers['cache-control']).toBe('no-store, no-cache, must-revalidate');
+    expect(response.headers.expires).toBe('Thu, 19 Nov 1981 08:52:00 GMT');
+    expect(response.headers.pragma).toBe('no-cache');
+    expect(response.headers['set-cookie']).toBeUndefined();
+    if (method === 'head') expect(response.text).toBeUndefined();
+  });
+
+  it('keeps HTML error cache headers scoped to rendered error pages', async () => {
+    const responses = await Promise.all([
+      request.get('/v2/devices').expect(401),
+      request.get('/v2/devices').set('Accept', 'application/xml').expect(401),
+      request.options('/v2/devices').set('Access-Control-Request-Method', 'GET').expect(200),
+      request.get('/health').expect(200),
+    ]);
+    for (const [index, response] of responses.entries()) {
+      expect(response.headers['cache-control']).toBe(index === 3 ? 'no-store' : undefined);
+      expect(response.headers.expires).toBeUndefined();
+      expect(response.headers.pragma).toBeUndefined();
+    }
+  });
+
   it.each(['post', 'put', 'patch', 'delete'] as const)('resolves disabled file CRUD %s as HTML before authentication', async method => {
     const response = await request[method](method === 'post' ? '/v2/files' : '/v2/files/1').expect(404);
     expect(response.headers['content-type']).toMatch(/^text\/html/);
