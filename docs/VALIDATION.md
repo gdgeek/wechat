@@ -17,6 +17,6 @@
 
 数据测试包含真实行锁、重复预约竞争、数据库写入失败回滚、游戏积分与余额、JSON 标量/中文类型保留、Cookie/CSRF 旋转、扫码票据单次消费及 owner/audience、实时 control 权限撤销、12 个并发配置写入、跨后端实例诊断读取、Yii Redis 键兼容。微信支付及 COS/STS 测试使用本地真实密码算法和可注入传输，不向真实商户发起交易。
 
-GitHub Actions 对 MariaDB 与 MySQL 两种数据库定义同一验收矩阵；运行结果见仓库 Actions。
+GitHub Actions 的 MariaDB 与 MySQL 验收矩阵均已通过：代码提交 `f1ccbe5`，[第 1 次 CI](https://github.com/gdgeek/wechat/actions/runs/39821551836)。两个任务均通过依赖安装、构建、数据库初始化、100 项测试、路由核对及 Docker 生产构建。
 
 本次没有运行生产迁移或切换线上入口，没有修改 Vue 管理后台、小程序或源 Yii2 仓库。仍需在配置齐全的验收环境检查微信登录/手机号授权、支付和退款平台回调、COS 权限、Y1 目录及真实设备。原数据库已删除的 `device.shop_id` 历史映射必须从可信数据恢复，不能由迁移程序猜测。已知旧损坏入口的处理与安全适配列在 `API_PARITY.md`。

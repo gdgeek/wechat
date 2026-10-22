@@ -18,7 +18,7 @@
 - [x] Scope confirmed: migrate backend only. Do not modify or copy Vue administration UI, small program, or the source repository deployment files. Preserve their existing HTTP contracts.
 - [x] Provide repeatable schema/bootstrap migration, env template, Docker Compose and GitHub Actions.
 - [x] Run build, contract/unit tests, isolated MySQL/Redis HTTP integration tests, route parity check and independent review. Document any external checks requiring real credentials.
-- [ ] Inspect repository diff for credentials and unrelated changes, commit and push to gdgeek/wechat; verify remote commit and CI.
+- [x] Inspect repository diff for credentials and unrelated changes, commit and push to gdgeek/wechat; verify remote commit and CI.
 
 ## Acceptance
 
