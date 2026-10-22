@@ -1,14 +1,21 @@
 {
   "source": "gdgeek/game",
-  "gitHead": "95aba57c241194fd0fd550623a45f6ddff2b2d78",
-  "capturedAt": "2026-10-22T17:52:58.258597+00:00",
-  "note": "Frozen game backend including local administration JWT, device deletion/history preservation, device-version reporting, and mini-program file prices/order reservation/payment confirmation. Later concurrent source changes are outside this acceptance snapshot. Clients and credentials are excluded; only source hashes are stored.",
+  "gitHead": "412ce84b7a6c3f33d0917e5be35435f04db842e1",
+  "capturedAt": "2026-10-22T18:42:40.215688+00:00",
+  "note": "Backend-only Yii parity acceptance snapshot; includes current uncommitted backend edits. Clients and credentials excluded; hashes only.",
+  "sourceScope": [
+    "api/components",
+    "api/controllers",
+    "api/migrations",
+    "api/modules"
+  ],
   "files": {
     "api/.intelephense/stubs.php": "d08e8620a5eb0efb5a3b990669a9e39947c4f1e98950cd00955d2c909f18df99",
     "api/commands/HelloController.php": "8b94020784a07815ccf9c9b238e9067ebc4f6ab1eda32a7b5723c99b436b38d8",
     "api/components/AdminAuthService.php": "cebf01862b5f6bf61f7d13b1ce02f2814061c787bde9ea1c3dd0d2e47d5abfee",
-    "api/components/AdminDeviceService.php": "5b51240e72217bd8182292d842e1f8c82600cd6022daa7a6910c41f849e5b955",
+    "api/components/AdminDeviceService.php": "4e20af92ee72b25de17e3c808d6ae8529c07a33ca93fd81b1e623e8d2487d8a1",
     "api/components/AdminGameCatalog.php": "ab3c912a6e9e64b94215040e6731a16da767de2803e17c7d77c27fef2f41f0e2",
+    "api/components/AdminImagePreviewService.php": "731a1ad27ac4125e0f82789b6324d2873dd4fca5223f95935e607b42e4c214ed",
     "api/components/AdminScanLoginService.php": "4e1e343b6940fc4faacb66e051e43848092ea8ec32ff4a0445c60c86a38ad064",
     "api/components/AdminSceneFetcher.php": "f326e50b011160304df4c885e8b9e485e6b48848f6a4aa269748fa3325f11c7f",
     "api/components/AdminTokenService.php": "d1bc2f9c0c7bea4d3712e374e9c5d16f95820f84cadf8876fa7e5818c2dca8b6",
@@ -17,7 +24,7 @@
     "api/components/Helper.php": "83309c05d7ddbc596baf5ebc7c8533e89ab7c40699a516fcdf6842821e534f88",
     "api/components/MiniProgramFileService.php": "c4b220e6e2a363a8eb94991e1c7ba6688466bf21e4714c848dc86b8c2cd9504e",
     "api/components/UrlManager.php": "bcbacd1b992eb1241520f40526796b6df245bde238d43c691589c122a2eaf189",
-    "api/controllers/AdminController.php": "32c093d3caada8a4eb1bd3be6bdb8c7e56807ec026d2c0fcb269c8da2a0d70ba",
+    "api/controllers/AdminController.php": "6962ecca3274bcc11578e12e0dab54538a2b0a146ac0d7f2ca96df74954d63d5",
     "api/controllers/HealthController.php": "e86a3e0de2f09bd622f79a97458fe56565c1900b65a630885aa442eba65ba476",
     "api/controllers/SiteController.php": "a8917ffd5c566391ae78bd0cd9e5b7fd0de88c2e5dce356afffd3240e3638b4c",
     "api/controllers/SwaggerController.php": "7e21c419ba12e7882a080f797272423ef8bab465f2be35cfc403acdc65c2871d",
@@ -135,7 +142,7 @@
     "api/modules/v2/Module.php": "d6cf4c93cffb51e78dcb3d38d06ffec354637f38947a9d2f27012df252801531",
     "api/modules/v2/controllers/AppletController.php": "601a7b0add9c2ed505aacd65b06c12c2985731125c9a04875d78b7f412ebd308",
     "api/modules/v2/controllers/DeviceController.php": "cf7fc6e8a411ee7f5f82e528f6c43f1d5c9d352814f899df1a8d44fdd68fc3b0",
-    "api/modules/v2/controllers/FileController.php": "da291d13e79d04aae6f59ec2b5b27b790236663f30fb69429d2317a43ec36716",
+    "api/modules/v2/controllers/FileController.php": "dc3564c1e28a570667df08513212ea48282b8219d2ad5ce1c95be122b2823e1a",
     "api/modules/v2/controllers/ManagerController.php": "a04b7b7fafaf8b376a342c0f904b1296ef13016fb1081d0a49c3ceec21bc8927",
     "api/modules/v2/controllers/PlayerController.php": "73410f2439def260eb1c8bfe7e49da89644370c88c0a651eacf6f61e7dae4227",
     "api/modules/v2/controllers/RootController.php": "a9bc9a41225b36be4eb44709d72cbaf84560a7ea075e76caadb42d61f867484a",
@@ -145,7 +152,7 @@
     "api/modules/v2/controllers/TencentCloudController.php": "668b0a09c854bec1f86e854713899ca27646460a700539c2716e5b40d9014e25",
     "api/modules/v2/controllers/WebLoginController.php": "d0e1f68ca187bbbb5743dc80c73d30b5d54ea6699fc262f3be03c5842a6b6481",
     "api/modules/v2/controllers/WechatController.php": "832de4741af466f8a2c736aeb9df40327214dde2038194b211d70a365aeb59ec",
-    "api/modules/v2/controllers/WechatPayController.php": "43ecd4539b20ebae4face8f4aeb6fadabb7bad4b962c8fc100fe19ca7d24b05c",
+    "api/modules/v2/controllers/WechatPayController.php": "1d007b482c7d1cdfa49a37f0773f09b7f5eefe9959ed5b9b49595239871fec20",
     "api/modules/v2/helper/A1Server.php": "75accc1447a2122d6557551fff8ff17ed73062f369b453fb7df39791a0eda6e2",
     "api/modules/v2/helper/DeviceAccess.php": "c8e0243e2f83f4f338c783abfa72c8765b3e8244364215b305176a8c0915b70e",
     "api/modules/v2/helper/DeviceAuth.php": "5ef679dda729aff7681f377f8faaa7e81f7b6739303ee7b7c52b7ea3d85335df",
@@ -157,7 +164,7 @@
     "api/modules/v2/models/Control.php": "052208334fff38506a86e16d56e587efa43d5f9b4d0916c63c7ac5d21d2362bd",
     "api/modules/v2/models/Device.php": "889cabc326c68c48fdfdcac9e59eeeeeaf9ca08712ea6f07583d70a7fa6cb06a",
     "api/modules/v2/models/DeviceSearch.php": "8735d6accaf5145ab591b2a87401e79c7cae6d5190ee685c7ca03cd7992abd45",
-    "api/modules/v2/models/File.php": "03edce43a733befcf613bf70b7f3f4c52a2a2495e2eac553570d7d3d2302fc34",
+    "api/modules/v2/models/File.php": "1005396345ef4791e0e78a2932d60d172f878acae81053c461a18e3cb7b3c40b",
     "api/modules/v2/models/FileSearch.php": "3b29e57cbfc68ec645b639908c6f49d10afb60ad3b7e9936da6bc3b6d969ebc7",
     "api/modules/v2/models/RecodeFile.php": "67b55c1e81d5f73564bf57206b7f2ea1890750230be587bb2e81598b1669b8de",
     "api/modules/v2/models/Report.php": "b1c6cf7920effbe606de82427547b9e83fe9c5e12bc60115521977ff078b897f",
@@ -180,7 +187,7 @@
     "api/tests/functional/LoginFormCest.php": "25585d3b8724bc6303ce6b3bcb185567a9447327c98b81ebb3a55bcbb84aa6c0",
     "api/tests/functional/_bootstrap.php": "00aba3928cd622ad67c0f81ecd5aa8699e07f8f4908c045fe34f6a2dc0067b37",
     "api/tests/unit/_bootstrap.php": "e8250569d5150727bde76008e823e91d59c69c8d30a173f34c2c2fd25c346ff5",
-    "api/tests/unit/components/AdminApiTest.php": "51f52382a1bc1c204442bd40b1b659492056a92a35f01f28b156d28d31a99af6",
+    "api/tests/unit/components/AdminApiTest.php": "6ea75e22a99a854b105e3a449a4f002bc57e0f8ecff71533011234dc6589a2dd",
     "api/tests/unit/components/AdminAuthConfigTest.php": "8ab7fd53595dc1a63c544f522ce8252a31ea96f89448c62e44e76d7a98d9bc21",
     "api/tests/unit/components/AdminScanLoginTest.php": "8a0774d07257297fdf3159bea30fb5602e01a0222b35cd9ce5fb15d2292fd188",
     "api/tests/unit/components/AdminSceneFetcherTest.php": "00cefbeb4e4ab72a807d53ec6e83ec39055cea723305eb640d8c776315b4a390",
@@ -203,14 +210,8 @@
     "api/web/index-test.php": "779ea9d28b742ef902f673439d6c380067f4e6a2bac6b2a4429b8a1261070846",
     "api/web/index.php": "2865d6a935093e799c6d64def2b954ea366c7376fb245f67066d8ff582a631db",
     "api/widgets/Alert.php": "2dd8f7b41af071d1125d9fe39f5dda99f435d77355a63222bf8cf74359f83052",
-    "docs/ADMIN_API.md": "1356f3d22fc695d9ee6d3b49d834bd9c5f0ba85145d7ee83953ac9d5fd32f516",
+    "docs/ADMIN_API.md": "629caf6d012d1c1dd4a1b585c6999cc33253b7a540735f251b09bcc5a8444ac6",
     "docs/BUJIABAN_MP.md": "a46c7967d89a74ddab4e02c215d88e48eecd1f0ce2187870f2ba2b362ffa91f8",
-    "files/api/config/web.php": "25fb33391d1fb9187691cf87415d5b821b08413cfd2937d580102549d49c447b"
-  },
-  "sourceScope": [
-    "api/components",
-    "api/controllers",
-    "api/migrations",
-    "api/modules"
-  ]
+    "files/api/config/web.php": "150f044bf15a52e6869f6960fef539be121a25453e9288bc711ee8cb691926c4"
+  }
 }

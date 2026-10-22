@@ -5,7 +5,7 @@ import { defaultData } from '../v2/server';
 function content(values: unknown): string[] { return Array.isArray(values) ? values.filter((value): value is string => typeof value === 'string' && value.trim() !== '').map(value => value.trim()) : []; }
 export function normalizeDevice(device: Row, setup: Row | null): Row {
   const title = String(setup?.title ?? '');
-  return { id: Number(device.id), uuid: String(device.uuid ?? ''), name: title.trim() && title.trim() !== '未知' ? title.trim() : String(device.tag || device.uuid || `设备 ${device.id}`), title, ip: String(device.ip ?? ''), status: 'unknown', updatedAt: String(setup?.updated_at || device.updated_at || ''), gameId: setup?.scene_id == null ? null : Number(setup.scene_id), slogans: content(setup?.slogans), pictures: content(setup?.pictures), thumbs: content(setup?.thumbs) };
+  return { id: Number(device.id), version: Number(device.version ?? 0), uuid: String(device.uuid ?? ''), name: title.trim() && title.trim() !== '未知' ? title.trim() : String(device.tag || device.uuid || `设备 ${device.id}`), title, ip: String(device.ip ?? ''), status: 'unknown', updatedAt: String(setup?.updated_at || device.updated_at || ''), gameId: setup?.scene_id == null ? null : Number(setup.scene_id), slogans: content(setup?.slogans), pictures: content(setup?.pictures), thumbs: content(setup?.thumbs) };
 }
 export function validateConfiguration(input: unknown): Row {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new ApiError(422, '设备配置必须为 JSON 对象');
@@ -26,12 +26,21 @@ export function validateConfiguration(input: unknown): Row {
 }
 export class AdminDevices {
   constructor(private readonly services: Services) {}
+  async imageSources(id: number, userId: number | null): Promise<string[]> {
+    try {
+      const where = userId === null ? '' : ' AND id IN (SELECT device_id FROM control WHERE user_id=?)';
+      const device = await this.services.db.one(`SELECT * FROM device WHERE id=?${where}`, userId === null ? [id] : [id, userId]);
+      if (!device) throw new ApiError(404, '设备不存在');
+      const setup = await this.services.db.one('SELECT * FROM setup WHERE device_id=? LIMIT 1', [id]);
+      return [...new Set([...content(setup?.pictures), ...content(setup?.thumbs)])];
+    } catch (error) { if (error instanceof ApiError) throw error; throw new ApiError(503, '设备数据暂时不可用，请稍后重试', undefined, 'HttpException'); }
+  }
   async list(userId: number | null): Promise<Row[]> {
     try {
       const where = userId === null ? '' : ' WHERE device.id IN (SELECT device_id FROM control WHERE user_id=?)';
       const devices = await this.services.db.query(`SELECT * FROM device${where} ORDER BY id`, userId === null ? [] : [userId]);
       return await Promise.all(devices.map(async device => normalizeDevice(device, await this.services.db.one('SELECT * FROM setup WHERE device_id=? LIMIT 1', [device.id]))));
-    } catch { throw new ApiError(503, '设备数据暂时不可用，请稍后重试'); }
+    } catch { throw new ApiError(503, '设备数据暂时不可用，请稍后重试', undefined, 'HttpException'); }
   }
   async deleteDevice(id: number, userId: number | null): Promise<Row> {
     if (userId !== null) throw new ApiError(403, '仅管理员可以删除设备');
@@ -50,7 +59,7 @@ export class AdminDevices {
         if (deleted.affectedRows !== 1) throw new Error('Device deletion did not remove its record.');
         return { id, deleted: true };
       });
-    } catch (error) { if (error instanceof ApiError) throw error; throw new ApiError(503, '设备暂时无法删除，请稍后重试'); }
+    } catch (error) { if (error instanceof ApiError) throw error; throw new ApiError(503, '设备暂时无法删除，请稍后重试', undefined, 'HttpException'); }
   }
   async update(id: number, input: unknown, userId: number | null): Promise<Row> {
     const patch = validateConfiguration(input);
@@ -71,6 +80,6 @@ export class AdminDevices {
         setup = await db.update('setup', setup.id, data);
         return normalizeDevice(device, setup);
       });
-    } catch (error) { if (error instanceof ApiError) throw error; throw new ApiError(503, '设备配置暂时无法保存，请稍后重试'); }
+    } catch (error) { if (error instanceof ApiError) throw error; throw new ApiError(503, '设备配置暂时无法保存，请稍后重试', undefined, 'HttpException'); }
   }
 }

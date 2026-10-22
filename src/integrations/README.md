@@ -38,7 +38,7 @@ response details and signing material do not reach HTTP error messages.
 
 ## Compatibility boundaries
 
-- Web admin Session/CSRF and WeChat Bearer identities stay independent.
+- Web admin `game-admin` JWT and WeChat `v2-user` Bearer identities stay independent.
 - v2 login uses only the `codeSession` identity. When unionid is absent, an
   existing verified openid is required; client-provided identity fields do not
   create or select a user.
@@ -63,9 +63,10 @@ response details and signing material do not reach HTTP error messages.
   signature, five minute signature window, authenticated AES-256-GCM payload,
   merchant/AppID and event category before acknowledgment. A v2 paid callback
   queries WeChat again and performs the same file payment checks before granting
-  access; callback fields alone cannot unlock a file. Failed confirmation returns
-  HTTP 500 without success acknowledgment. v1 callbacks and refund callbacks retain
-  their existing acknowledgment behavior. An optional `onPaymentNotification`
+  access; callback fields alone cannot unlock a file. Failed or still-unpaid
+  confirmation returns HTTP 500 without success acknowledgment. Successfully
+  verified v1 callbacks and refund callbacks serialize to `{}`, matching Yii's
+  SDK object response. An optional `onPaymentNotification`
   hook remains available; hook failure prevents acknowledgment.
 - The old v2 controller incorrectly required a user Bearer on WeChat callbacks.
   Callbacks now authenticate using the provider signature, while other v2
@@ -73,14 +74,28 @@ response details and signing material do not reach HTTP error messages.
 - The old `/v1/q-cloud/object-url` called an undefined `File::Create` method and
   failed. This broken action is repaired to return `{url,method,expires}` using
   COS signing. It does not create a fictional file record or accept a raw mode.
-- The old v1 WeChat info returned an SDK object; that endpoint now returns public
-  application/merchant identifiers only, without serializing SDK configuration
+- The v1 WeChat info SDK object serializes to `{}`, without exposing SDK configuration
   or secrets. The missing v2 info action and the unpublished v2 code action stay
   HTTP 404 and are not exposed as new endpoints.
 - STS grants are restricted to the configured bucket/region. The deprecated
   `principal` policy member and nonexistent COS actions from the old request are
   excluded. The configured bucket policy still supports the original upload,
   download and multipart operations.
+- Current v1 token requests require `bucket` and default `region` to `ap-nanjing`;
+  v2 token requests use configured storage and ignore query overrides. An
+  unconfigured cloud discovery response retains `{bucket:false,region:false}`.
+- Admin saved-image previews use the current device control scope and sign only
+  HTTPS objects from the configured COS bucket. Links use GET, a shared absolute
+  five-minute expiry, and the SDK-compatible `sign` parameter. Saved query strings,
+  request overrides and fragments never reach signing; GET never creates setup.
+
+The source comparison uses the Yii snapshot captured on 2026-10-23. Intentional
+exceptions remain: invalid/empty legacy callbacks are rejected cryptographically
+even though the old unserved SDK object returned `{}`; nonpositive or unsafe v1
+payment amounts fail before provider traffic; provider error details are
+sanitized; STS cannot target arbitrary buckets; and the broken QCloud action is
+repaired as described above. Scene forwarding continues to verify HTTPS
+certificates. These exceptions do not weaken account ownership or payment checks.
 
 ## Official protocol references
 
@@ -98,7 +113,7 @@ response details and signing material do not reach HTTP error messages.
 
 ## Verification
 
-`npm test -- tests/integrations.test.ts tests/integrations.routes.test.ts tests/integrations.payments.test.ts`
+`npm test -- tests/integrations.test.ts tests/integrations.routes.test.ts tests/integrations.payments.test.ts tests/integrations-parity.test.ts tests/admin-image-parity.test.ts`
 
 Tests use generated test RSA keys and injected provider responses, exercising
 exact request signing, response verification, authentic notification decryption,

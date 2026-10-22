@@ -26,11 +26,28 @@ export class LegacyRedis {
   }
   async connect(): Promise<void> {
     if (this.client.isReady) return;
-    this.connecting ??= this.client.connect().finally(() => { this.connecting = undefined; });
+    this.connecting ??= this.deadline(this.client.connect(), this.options?.timeout ?? 3000).finally(() => { this.connecting = undefined; });
     await this.connecting;
   }
-  async command(args: string[]): Promise<any> { await this.connect(); return this.client.sendCommand(args, this.options?.timeout ? { abortSignal: AbortSignal.timeout(this.options.timeout) } : undefined); }
-  async ping(): Promise<string> { return this.command(['PING']); }
+  private async deadline<T>(operation: Promise<T>, timeout: number): Promise<T> {
+    let timer: ReturnType<typeof setTimeout>;
+    try {
+      return await Promise.race([operation, new Promise<never>((_resolve, reject) => {
+        timer = setTimeout(() => {
+          reject(new Error('Redis operation timed out'));
+          // node-redis removes AbortSignal listeners after writing a command.
+          // Close the stalled socket to reject queued reads and permit reconnection.
+          if (this.client.isOpen) this.client.destroy();
+        }, timeout);
+      })]);
+    } finally { clearTimeout(timer!); }
+  }
+  async command(args: string[], timeout = this.options?.timeout): Promise<any> {
+    await this.connect();
+    const operation = this.client.sendCommand(args);
+    return timeout ? this.deadline(operation, timeout) : operation;
+  }
+  async ping(): Promise<string> { return this.command(['PING'], 3000); }
   async find(model: string, pk: unknown): Promise<Row | null> {
     const values = await this.command(['HGETALL', `${model}:a:${buildRedisKey(pk)}`]) as string[];
     if (!values.length) return null;

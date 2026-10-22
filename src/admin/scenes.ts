@@ -35,7 +35,7 @@ export class SceneCatalog {
         if (response.ok) this.forwarded = { until: this.now() + 30000, payload };
         return payload;
       } catch { ctx.res.type('text/plain'); return text; }
-    } catch { throw new ApiError(500, '转发请求失败'); }
+    } catch { throw new ApiError(500, '转发请求失败', undefined, 'HttpException'); }
   }
   async fetchScenes(): Promise<Row[]> {
     const base = sceneBaseUrl(this.options.baseUrl);
@@ -80,6 +80,6 @@ export class SceneCatalog {
       const result = [...games.values()];
       this.cached = { until: this.now() + 30000, games: result };
       return result;
-    } catch { throw new ApiError(503, '游戏列表暂时不可用，请稍后重试'); }
+    } catch { throw new ApiError(503, '游戏列表暂时不可用，请稍后重试', undefined, 'HttpException'); }
   }
 }

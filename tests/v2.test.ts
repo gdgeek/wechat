@@ -4,6 +4,15 @@ import { createHash } from 'node:crypto';
 import { AuthService } from '../src/core/auth';
 
 type Handler = (ctx: Context) => Promise<any> | any;
+function mysqlLike(value:unknown, pattern:unknown):boolean {
+  const text=String(pattern);let regex='^';
+  const literal=(char:string)=>char.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  for(let i=0;i<text.length;i++) {
+    if(text[i]==='\\'&&i+1<text.length) regex+=literal(text[++i]);
+    else regex+=text[i]==='%' ? '.*' : text[i]==='_' ? '.' : literal(text[i]);
+  }
+  return new RegExp(regex+'$','s').test(String(value??''));
+}
 class MemoryDb {
   tables: Record<string, Row[]>;
   constructor(seed: Record<string, Row[]> = {}) { this.tables = structuredClone({ device: [], setup: [], control: [], file: [], user: [], ...seed }); }
@@ -23,7 +32,7 @@ class MemoryDb {
     for (const match of where.matchAll(/(?:`?\w+`?\.)?`?(\w+)`?\s*(=|LIKE|!=)\s*\?/ig)) {
       const [, key, op] = match;
       const value = params[offset++];
-      result = result.filter(r => op.toUpperCase() === 'LIKE' ? String(r[key] ?? '').includes(String(value).replace(/^%|%$/g, '')) : op === '!=' ? String(r[key]) !== String(value) : String(r[key]) === String(value));
+      result = result.filter(r => op.toUpperCase() === 'LIKE' ? mysqlLike(r[key],value) : op === '!=' ? String(r[key]) !== String(value) : String(r[key]) === String(value));
     }
     if (/COUNT\(\*\)/i.test(sql)) return [{ total: result.length }];
     const order = sql.match(/ORDER BY\s+`?(\w+)`?\s*(ASC|DESC)?/i);
@@ -36,6 +45,11 @@ class MemoryDb {
   async insert(table: string, data: Row) { const row = { ...(table === 'setup' ? { money: 0 } : {}), id: Math.max(0, ...this.tables[table].map(r => Number(r.id))) + 1, ...structuredClone(data) }; this.tables[table].push(row); return structuredClone(row); }
   async update(table: string, id: any, data: Row) { const row = this.tables[table].find(r => String(r.id) === String(id)); if (!row) throw new Error('Row missing'); Object.assign(row, structuredClone(data)); return structuredClone(row); }
   async execute(sql: string, params: any[] = []) {
+    if (/^UPDATE user SET role = \? WHERE id = \?$/i.test(sql)) {
+      const row=this.tables.user.find(r=>String(r.id)===String(params[1]));
+      if(row) row.role=params[0];
+      return {affectedRows:row ? 1 : 0,insertId:0};
+    }
     if (!/^UPDATE device SET version = \? WHERE id = \?$/i.test(sql)) throw new Error(`Unsupported SQL ${sql}`);
     const row = this.tables.device.find(r => String(r.id) === String(params[1]));
     if (row) row.version = params[0];
@@ -78,6 +92,65 @@ const devices = [{ id: 1, uuid: 'mine', tag: 'mine', ip: null }, { id: 2, uuid: 
 const controls = [{ id: 1, device_id: 1, user_id: 1 }];
 
 describe('v2 device and setup contracts', () => {
+  it('treats percent underscore and backslash in device search as literal characters',async()=>{
+    const rows=['unit_1','unitx1','unit%1','unit\\1'].map((uuid,index)=>({id:index+1,uuid}));
+    const f=await fixture({device:rows,control:rows.map(row=>({device_id:row.id,user_id:1}))});
+    for(const [uuid,id] of [['_',1],['%',3],['\\',4]] as const) {
+      const response=await f.request('GET','/v2/devices/manage',{}, {DeviceSearch:{uuid}});
+      expect(response.value.map((row:Row)=>row.id)).toEqual([id]);
+    }
+  });
+  it('persists optional empty numeric strings as null without changing their immediate response values',async()=>{
+    const f=await fixture({device:devices,control:controls,setup:[{id:7,device_id:1,money:250,scene_id:1}]});
+    expect((await f.request('PATCH','/v2/setups/7',{money:'',scene_id:''})).value).toMatchObject({money:'',scene_id:''});
+    expect(f.db.tables.setup[0]).toMatchObject({money:null,scene_id:null});
+  });
+  it('refreshes expanded user roles without changing their persisted updated_at',async()=>{
+    const original='2000-01-01 00:00:00';
+    const f=await fixture({device:devices,control:controls,user:[{id:1,tel:'123',role:'user',updated_at:original}]});
+    const update=f.db.update.bind(f.db);
+    f.db.update=(table,id,data)=>update(table,id,table==='user' ? {updated_at:'changed-by-database-update',...data} : data);
+    expect((await f.request('GET','/v2/devices/1',{}, {expand:'admin'})).value.admin[0].role).toBe('manager');
+    expect(f.db.tables.user[0]).toMatchObject({role:'manager',updated_at:original});
+  });
+  it('serializes newly assigned setup attributes and raw numeric strings as Yii does after save',async()=>{
+    const f=await fixture({device:devices,control:controls});
+    const timestamp={expression:'NOW()',params:[]};
+    expect((await f.request('POST','/v2/setups',{device_id:'1',money:'250'})).value).toEqual({id:1,device_id:'1',money:'250',updated_at:timestamp});
+    expect((await f.request('PATCH','/v2/setups/1',{money:'300'})).value).toMatchObject({money:'300',updated_at:timestamp});
+  });
+  it('returns Yii field labels, specific string errors, and validator ordering',async()=>{
+    const f=await fixture({device:devices,control:controls,setup:[{id:7,device_id:1,money:250}]});
+    await expect(f.request('PATCH','/v2/devices/1',{uuid:true,tag:'a'.repeat(256)})).rejects.toMatchObject({status:422,responseBody:[
+      {field:'uuid',message:'Uuid must be a string.'},{field:'tag',message:'Tag should contain at most 255 characters.'}
+    ]});
+    await expect(f.request('PATCH','/v2/devices/1',{uuid:'other'})).rejects.toMatchObject({status:422,responseBody:[{field:'uuid',message:'Uuid "other" has already been taken.'}]});
+    await expect(f.request('PATCH','/v2/setups/7',{scene_id:'1.2',money:'0x10',title:false})).rejects.toMatchObject({status:422,responseBody:[
+      {field:'scene_id',message:'Scene ID must be an integer.'},{field:'money',message:'Money must be a number.'},{field:'title',message:'Title must be a string.'}
+    ]});
+  });
+  it('uses Yii numeric syntax for setup money and skips optional empty arrays',async()=>{
+    const f=await fixture({device:devices,control:controls,setup:[{id:7,device_id:1,money:250,scene_id:1}]});
+    for(const money of ['0x10',' ','1.',' 1',true,false,[1],{}]) {
+      await expect(f.request('PATCH','/v2/setups/7',{money})).rejects.toMatchObject({status:422});
+      expect(f.db.tables.setup[0].money).toBe(250);
+    }
+    expect((await f.request('PATCH','/v2/setups/7',{money:[],scene_id:[]})).value).toMatchObject({money:[],scene_id:[]});
+    expect(f.db.tables.setup[0]).toMatchObject({money:0,scene_id:0});
+  });
+  it('ignores pageSize and unsafe version filters in the legacy device search model',async()=>{
+    const f=await fixture({device:devices,control:[...controls,{device_id:2,user_id:1}]});
+    const response=await f.request('GET','/v2/devices/manage',{}, {pageSize:1,DeviceSearch:{version:999}});
+    expect(response.value.map((row:Row)=>row.id)).toEqual([1,2]);
+    expect(response.headers['x-pagination-per-page']).toBe(20);
+  });
+  it('returns the scoped unfiltered list when DeviceSearch id validation fails',async()=>{
+    const f=await fixture({device:devices,control:[...controls,{device_id:2,user_id:1}]});
+    for(const id of ['invalid','1.5',true,[1]]) {
+      const response=await f.request('GET','/v2/devices/manage',{}, {DeviceSearch:{id,uuid:'no-match'}});
+      expect(response.value.map((row:Row)=>row.id)).toEqual([1,2]);
+    }
+  });
   it('scopes even root WeChat identities to control rows and supplies Yii pagination headers', async () => {
     const f = await fixture({ device: devices, control: controls });
     const r = await f.request('GET', '/v2/devices', {}, { 'per-page': 1, page: 1 });
@@ -120,6 +193,25 @@ describe('v2 device and setup contracts', () => {
 });
 
 describe('v2 server initialization and rendezvous', () => {
+  it('keeps existing status and data when PHP-empty JSON containers are supplied',async()=>{
+    const f=await fixture({device:[{id:1,uuid:'existing',version:1}]});
+    await f.redis.save('report',{token:'bound',uuid:'existing',device_id:1,status:'ready',data:'previous'});
+    await f.request('POST','/v2/server/device',{token:'bound',uuid:'existing',status:[],data:{}},{expand:'device'});
+    expect(await f.redis.find('report','bound')).toMatchObject({status:'ready',data:'previous'});
+    await expect(f.request('POST','/v2/server/device',{token:[],uuid:'existing'})).rejects.toMatchObject({status:400,message:'token is required'});
+  });
+  it('treats a zero uuid as an empty value without creating a device',async()=>{
+    const f=await fixture();
+    const response=await f.request('GET','/v2/server/info',{}, {uuid:'0'});
+    expect(response.value).toMatchObject({success:true,data:{scene_id:42,title:'未知'}});
+    expect(f.db.tables.device).toEqual([]);
+    expect(f.db.tables.setup).toEqual([]);
+  });
+  it('accepts present empty log tokens and reports the missing required action parameter',async()=>{
+    const f=await fixture();
+    expect((await f.request('GET','/v2/server/log',{}, {token:''})).value).toEqual({success:true,message:'success',data:{checkin:null,report:null,file:null}});
+    await expect(f.request('GET','/v2/server/log')).rejects.toMatchObject({status:400,message:'Missing required parameters: token'});
+  });
   it('initializes a device and default configuration from the first dynamic Y1 game', async () => {
     const f = await fixture();
     const r = await f.request('GET', '/v2/server/info', {}, { uuid: 'new' });
@@ -197,7 +289,7 @@ describe('v2 additional compatibility cases', () => {
   it('persists a blank setup on expand as the legacy model does', async () => {
     const f = await fixture({ device: devices, control: controls });
     const r = await f.request('GET', '/v2/devices/1', {}, { expand: 'setup' });
-    expect(r.value.setup).toMatchObject({ device_id: 1, money: 0, title: null });
+    expect(r.value.setup).toEqual({id:1,device_id:1,updated_at:{expression:'NOW()',params:[]}});
     expect(f.db.tables.setup).toHaveLength(1);
     await f.request('GET', '/v2/devices/1', {}, { expand: 'setup' }); expect(f.db.tables.setup).toHaveLength(1);
   });

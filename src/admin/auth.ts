@@ -18,7 +18,7 @@ export class AdminAuth {
   private async isWechatUser(id: number): Promise<boolean> {
     if (!Number.isInteger(id) || id <= 0) return false;
     try { return !!await this.db.one('SELECT id FROM user WHERE id=?', [id]); }
-    catch { throw new ApiError(503, '用户身份暂时不可用，请稍后重试'); }
+    catch { throw new ApiError(503, '用户身份暂时不可用，请稍后重试', undefined, 'HttpException'); }
   }
   private async current(identity: AdminIdentity): Promise<boolean> {
     if (identity.source === 'password') return equal(identity.username, this.username()) && equal(identity.credentialFingerprint, sha256(this.passwordHash()));
@@ -42,7 +42,7 @@ export class AdminAuth {
     if (typeof username !== 'string' || typeof password !== 'string' || Buffer.byteLength(username) > 255 || Buffer.byteLength(password) > 1024) throw new ApiError(422, '请输入用户名和密码');
     const ip = `${ctx.req.ip ?? 'unknown'}:window:60`, issuer = this.tokens.issuer();
     const attempt = await this.tokens.store.reservePasswordAttempt(ip, 5, 60, issuer);
-    if (!attempt.allowed) { ctx.res.setHeader('Retry-After', String(Math.max(1, attempt.retryAfter))); throw new ApiError(429, '登录尝试过于频繁，请稍后重试'); }
+    if (!attempt.allowed) { ctx.res.setHeader('Retry-After', String(Math.max(1, attempt.retryAfter))); throw new ApiError(429, '登录尝试过于频繁，请稍后重试', undefined, 'HttpException'); }
     const valid = await bcrypt.compare(password, this.passwordHash().replace(/^\$2y\$/, '$2b$'));
     if (!equal(username, this.username()) || !valid) throw new ApiError(401, '用户名或密码错误');
     await this.tokens.store.clearPasswordAttempts(ip, issuer);

@@ -1,0 +1,2203 @@
+{
+  "source": "gdgeek/game Yii HTTP execution",
+  "sourceHead": "412ce84b7a6c3f33d0917e5be35435f04db842e1",
+  "sourceCapturedAt": "2026-10-22T18:42:40.215688+00:00",
+  "urlConfigSha256": "150f044bf15a52e6869f6960fef539be121a25453e9288bc711ee8cb691926c4",
+  "scope": "Anonymous requests with empty JSON body, Origin https://isolated.example, YII_DEBUG=true. Missing routes, precondition/auth failures and OPTIONS fallbacks only. HTML compares title/media/status; cookies/assets and dynamic business successes are excluded. Values captured by running frozen PHP controllers; no Node outputs used as expectations.",
+  "count": 441,
+  "groups": [
+    {
+      "expected": {
+        "status": 401,
+        "mime": "application/json",
+        "body": {
+          "name": "Unauthorized",
+          "message": "请先登录管理后台",
+          "code": 0,
+          "status": 401,
+          "type": "yii\\web\\UnauthorizedHttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "GET",
+          "path": "/admin-api/devices"
+        },
+        {
+          "method": "DELETE",
+          "path": "/admin-api/devices/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/admin-api/devices/1/configuration"
+        },
+        {
+          "method": "PUT",
+          "path": "/admin-api/devices/1/game"
+        },
+        {
+          "method": "GET",
+          "path": "/admin-api/devices/1/image-previews"
+        },
+        {
+          "method": "GET",
+          "path": "/admin-api/games"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 422,
+        "mime": "application/json",
+        "body": {
+          "name": "Unprocessable entity",
+          "message": "请输入用户名和密码",
+          "code": 0,
+          "status": 422,
+          "type": "yii\\web\\UnprocessableEntityHttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "POST",
+          "path": "/admin-api/login"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 422,
+        "mime": "application/json",
+        "body": {
+          "name": "Unprocessable entity",
+          "message": "请提供刷新令牌",
+          "code": 0,
+          "status": 422,
+          "type": "yii\\web\\UnprocessableEntityHttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "POST",
+          "path": "/admin-api/refresh"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 400,
+        "mime": "application/json",
+        "body": {
+          "name": "Bad Request",
+          "message": "扫码浏览器凭据无效",
+          "code": 0,
+          "status": 400,
+          "type": "yii\\web\\HttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "POST",
+          "path": "/admin-api/scan-login/tickets"
+        },
+        {
+          "method": "GET",
+          "path": "/admin-api/scan-login/tickets/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+        },
+        {
+          "method": "POST",
+          "path": "/admin-api/scan-login/tickets/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/cancel"
+        },
+        {
+          "method": "POST",
+          "path": "/admin-api/scan-login/tickets/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/consume"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 404,
+        "mime": "text/html",
+        "body": {
+          "htmlTitle": "Not Found (#404)"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "DELETE",
+          "path": "/apple-app-site-association"
+        },
+        {
+          "method": "GET",
+          "path": "/apple-app-site-association"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/apple-app-site-association"
+        },
+        {
+          "method": "PATCH",
+          "path": "/apple-app-site-association"
+        },
+        {
+          "method": "POST",
+          "path": "/apple-app-site-association"
+        },
+        {
+          "method": "PUT",
+          "path": "/apple-app-site-association"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/checkin"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/checkin"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/checkin"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/checkin"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/checkin"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/checkin"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/checkin/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/checkin/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/checkin/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/checkin/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/checkin/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/checkin/1"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/common"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/common"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/common"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/common"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/common"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/common"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/common/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/common/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/common/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/common/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/common/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/common/1"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/local"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/local"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/local"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/local"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/local"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/local"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/local/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/local/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/local/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/local/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/local/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/local/1"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/manager"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/manager"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/manager"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/manager"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/manager"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/manager"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/manager/login"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/manager/login"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/manager/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/manager/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/manager/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/manager/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/manager/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/manager/1"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/q-cloud"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/q-cloud"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/q-cloud"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/q-cloud"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/q-cloud"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/q-cloud"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/q-cloud/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/q-cloud/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/q-cloud/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/q-cloud/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/q-cloud/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/q-cloud/1"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/system"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/system"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/system"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/system"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/system"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/system"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/system/ready"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/system/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/system/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/system/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/system/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/system/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/system/1"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/tencent-cloud"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/tencent-cloud"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/tencent-cloud"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/tencent-cloud"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/tencent-cloud"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/tencent-cloud"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/tencent-cloud/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/tencent-cloud/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/tencent-cloud/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/tencent-cloud/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/tencent-cloud/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/tencent-cloud/1"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/we-chat"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/we-chat"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/we-chat"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/we-chat"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/we-chat"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/we-chat"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/we-chat/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/we-chat/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/we-chat/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/we-chat/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/we-chat/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/we-chat/1"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/web"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/web"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/web"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/web"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/web"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/web"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/web/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/web/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/web/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/web/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/web/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/web/1"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/wechat-pay"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/wechat-pay"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/wechat-pay"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/wechat-pay"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/wechat-pay"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/wechat-pay"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/wechat-pay/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/wechat-pay/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/wechat-pay/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/wechat-pay/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/wechat-pay/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/wechat-pay/1"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/applet"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/applet"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/applet"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/applet"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/applet"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/applet"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/applet/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/applet/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/applet/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/applet/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/applet/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/applet/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/files"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/files/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/files/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/files/1"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/server"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/server"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/server"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/server"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/server"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/server"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/server/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/server/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/server/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/server/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/server/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/server/1"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/site"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/site"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/site"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/site"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/site"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/site"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/site/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/site/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/site/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/site/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/site/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/site/1"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/tencent-cloud"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/tencent-cloud"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/tencent-cloud"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/tencent-cloud"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/tencent-cloud"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/tencent-cloud"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/tencent-cloud/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/tencent-cloud/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/tencent-cloud/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/tencent-cloud/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/tencent-cloud/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/tencent-cloud/1"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/wechat"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/wechat"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/wechat"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/wechat"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/wechat"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/wechat"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/wechat-pay"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/wechat-pay"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/wechat-pay"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/wechat-pay"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/wechat-pay"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/wechat-pay"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/wechat-pay/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/wechat-pay/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/wechat-pay/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/wechat-pay/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/wechat-pay/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/wechat-pay/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/wechat/info"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/wechat/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/wechat/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/wechat/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/wechat/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/wechat/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/wechat/1"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 404,
+        "mime": "text/html",
+        "body": null,
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "HEAD",
+          "path": "/apple-app-site-association"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/checkin"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/checkin/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/common"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/common/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/local"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/local/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/manager"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/manager/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/q-cloud"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/q-cloud/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/system"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/system/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/tencent-cloud"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/tencent-cloud/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/we-chat"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/we-chat/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/web"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/web/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/wechat-pay"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/wechat-pay/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/applet"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/applet/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/server"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/server/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/site"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/site/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/tencent-cloud"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/tencent-cloud/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/wechat"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/wechat-pay"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/wechat-pay/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/wechat/1"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 405,
+        "mime": "application/json",
+        "body": null,
+        "allow": "GET, POST, HEAD, OPTIONS",
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "DELETE",
+          "path": "/v1/award"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/award"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/award"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/device"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/device"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/device"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/game"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/game"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/game"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/gift"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/gift"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/gift"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/helper"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/helper"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/helper"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/player"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/player"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/player"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/record"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/record"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/record"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/shop"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/shop"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/shop"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/devices"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/devices"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/devices"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/files"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/files"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/files"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/setups"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/setups"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/setups"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 401,
+        "mime": "application/json",
+        "body": {
+          "name": "Unauthorized",
+          "message": "Your request was made with invalid credentials.",
+          "code": 0,
+          "status": 401,
+          "type": "yii\\web\\UnauthorizedHttpException"
+        },
+        "allow": null,
+        "auth": "Bearer realm=\"api\""
+      },
+      "cases": [
+        {
+          "method": "GET",
+          "path": "/v1/award"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/award"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/award/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/award/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/award/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/award/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/device"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/device"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/device/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/device/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/device/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/device/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/gift"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/gift"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/gift/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/gift/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/gift/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/gift/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/player"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/player"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/player/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/player/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/player/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/player/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/record"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/record"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/record/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/record/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/record/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/record/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/shop"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/shop"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v1/shop/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/shop/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v1/shop/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v1/shop/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/system/close-record"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/system/deduct-points"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/system/give"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/system/player-info"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/system/ready-game"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/system/reset-shop"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/web/async-routes"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/applet/refresh"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/files"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/files/list"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/files/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/wechat-pay/wxpay-order"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/wechat-pay/wxpay-query-order-by-out-trade-no"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/wechat-pay/wxpay-query-order-by-transaction-id"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/wechat-pay/wxpay-query-refund"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/wechat-pay/wxpay-refund"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/wechat/bind-phone"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/wechat/profile"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 401,
+        "mime": "application/json",
+        "body": null,
+        "allow": null,
+        "auth": "Bearer realm=\"api\""
+      },
+      "cases": [
+        {
+          "method": "HEAD",
+          "path": "/v1/award"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/award/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/device"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/device/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/gift"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/gift/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/player"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/player/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/record"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/record/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/shop"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v1/shop/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/devices"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/devices/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/files"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/files/1"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/setups"
+        },
+        {
+          "method": "HEAD",
+          "path": "/v2/setups/1"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 200,
+        "mime": "application/json",
+        "body": null,
+        "allow": "GET, POST, HEAD, OPTIONS",
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "OPTIONS",
+          "path": "/v1/award"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/device"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/game"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/gift"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/helper"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/player"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/record"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/shop"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/devices"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/files"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/setups"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 200,
+        "mime": "application/json",
+        "body": null,
+        "allow": "GET, PUT, PATCH, DELETE, HEAD, OPTIONS",
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "OPTIONS",
+          "path": "/v1/award/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/device/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/game/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/gift/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/helper/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/player/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/record/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v1/shop/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/devices/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/files/1"
+        },
+        {
+          "method": "OPTIONS",
+          "path": "/v2/setups/1"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 405,
+        "mime": "application/json",
+        "body": null,
+        "allow": "GET, PUT, PATCH, DELETE, HEAD, OPTIONS",
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "POST",
+          "path": "/v1/award/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/device/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/game/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/gift/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/helper/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/player/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/record/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/shop/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/devices/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/files/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/setups/1"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 400,
+        "mime": "application/json",
+        "body": {
+          "name": "Bad Request",
+          "message": "openid is required",
+          "code": 0,
+          "status": 400,
+          "type": "yii\\web\\HttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "DELETE",
+          "path": "/v1/checkin/close"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/checkin/files"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 400,
+        "mime": "application/json",
+        "body": {
+          "name": "Bad Request",
+          "message": "token is required",
+          "code": 0,
+          "status": 400,
+          "type": "yii\\web\\HttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "POST",
+          "path": "/v1/checkin/ready"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/checkin/report"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/checkin/status"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/checkin/status-linked"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/checkin/status-over"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/checkin/status-ready"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/checkin/upload"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/local/refresh"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/local/refresh"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/server/refresh"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/server/refresh"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 401,
+        "mime": "application/json",
+        "body": {
+          "name": "Unauthorized",
+          "message": "Invalid or expired refreshToken",
+          "code": 0,
+          "status": 401,
+          "type": "yii\\web\\UnauthorizedHttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "POST",
+          "path": "/v1/common/refresh-token"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/site/refresh-token"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 401,
+        "mime": "application/json",
+        "body": {
+          "name": "Unauthorized",
+          "message": "Your request was made with invalid credentials.",
+          "code": 0,
+          "status": 401,
+          "type": "yii\\web\\UnauthorizedHttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "POST",
+          "path": "/v1/common/sign-in"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/common/sign-up"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 400,
+        "mime": "application/json",
+        "body": {
+          "name": "Bad Request",
+          "message": "No record",
+          "code": 0,
+          "status": 400,
+          "type": "yii\\web\\HttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "GET",
+          "path": "/v1/game/finish"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/game/finish"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/game/restart"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/game/restart"
+        },
+        {
+          "method": "GET",
+          "path": "/v1/game/start"
+        },
+        {
+          "method": "POST",
+          "path": "/v1/game/start"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 422,
+        "mime": "application/json",
+        "body": [
+          {
+            "field": "tel",
+            "message": "Tel cannot be blank."
+          }
+        ],
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "POST",
+          "path": "/v1/helper"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 200,
+        "mime": "application/json",
+        "body": null,
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "GET",
+          "path": "/v1/helper/test"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 400,
+        "mime": "application/json",
+        "body": {
+          "name": "Bad Request",
+          "message": "Missing required parameters: token",
+          "code": 0,
+          "status": 400,
+          "type": "yii\\web\\BadRequestHttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "GET",
+          "path": "/v1/local/log"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/server/log"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 400,
+        "mime": "application/json",
+        "body": {
+          "name": "Bad Request",
+          "message": "Missing required parameters: key",
+          "code": 0,
+          "status": 400,
+          "type": "yii\\web\\BadRequestHttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "GET",
+          "path": "/v1/q-cloud/object-url"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 400,
+        "mime": "application/json",
+        "body": {
+          "name": "Bad Request",
+          "message": "Missing required parameters: bucket",
+          "code": 0,
+          "status": 400,
+          "type": "yii\\web\\BadRequestHttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "GET",
+          "path": "/v1/tencent-cloud/token"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 400,
+        "mime": "application/json",
+        "body": {
+          "name": "Bad Request",
+          "message": "code is required",
+          "code": 0,
+          "status": 400,
+          "type": "yii\\web\\HttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "POST",
+          "path": "/v1/we-chat/openid"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/site/login"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 401,
+        "mime": "application/json",
+        "body": {
+          "name": "Unauthorized",
+          "message": "Your request was made with invalid or expired JSON Web Token.",
+          "code": 0,
+          "status": 401,
+          "type": "yii\\web\\UnauthorizedHttpException"
+        },
+        "allow": null,
+        "auth": "Bearer realm=\"api\""
+      },
+      "cases": [
+        {
+          "method": "GET",
+          "path": "/v2/devices"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/devices"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/devices/assign"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/devices/manage"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/devices/1/assign"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/devices/1/assign/1"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/devices/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/devices/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/devices/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/devices/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/setups"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/setups"
+        },
+        {
+          "method": "DELETE",
+          "path": "/v2/setups/1"
+        },
+        {
+          "method": "GET",
+          "path": "/v2/setups/1"
+        },
+        {
+          "method": "PATCH",
+          "path": "/v2/setups/1"
+        },
+        {
+          "method": "PUT",
+          "path": "/v2/setups/1"
+        },
+        {
+          "method": "POST",
+          "path": "/v2/web-login/tickets/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/approve"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 400,
+        "mime": "application/json",
+        "body": {
+          "name": "Bad Request",
+          "message": "id is required",
+          "code": 0,
+          "status": 400,
+          "type": "yii\\web\\HttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "POST",
+          "path": "/v2/server/applet"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 400,
+        "mime": "application/json",
+        "body": {
+          "name": "Bad Request",
+          "message": "uuid is required",
+          "code": 0,
+          "status": 400,
+          "type": "yii\\web\\HttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "POST",
+          "path": "/v2/server/device"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 400,
+        "mime": "application/json",
+        "body": {
+          "name": "Bad Request",
+          "message": "key is required",
+          "code": 0,
+          "status": 400,
+          "type": "yii\\web\\HttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "POST",
+          "path": "/v2/server/file"
+        }
+      ]
+    },
+    {
+      "expected": {
+        "status": 400,
+        "mime": "application/json",
+        "body": {
+          "name": "Bad Request",
+          "message": "Missing required parameters: uuid",
+          "code": 0,
+          "status": 400,
+          "type": "yii\\web\\BadRequestHttpException"
+        },
+        "allow": null,
+        "auth": null
+      },
+      "cases": [
+        {
+          "method": "GET",
+          "path": "/v2/server/info"
+        }
+      ]
+    }
+  ]
+}

@@ -16,7 +16,7 @@ function setupInfo(row: Row): Row { const value = hydrate(row); return Object.fr
 function setupData(row: Row): Row { const value = hydrate(row); return Object.fromEntries(['money', 'slogans', 'thumbs', 'shots'].map(key => [key, value[key] ?? null])); }
 export async function getInfo(s: Services, uuid: unknown): Promise<Row> {
   if (uuid !== null && uuid !== undefined && typeof uuid !== 'string') throw new ApiError(400, 'uuid must be a string');
-  if (uuid) {
+  if (truthy(uuid)) {
     let device = await s.db.one('SELECT * FROM device WHERE uuid = ?', [uuid]);
     if (!device) {
       // Resolve the upstream directory before inserting anything, then commit the
@@ -50,9 +50,9 @@ function redisRow(model: string, row: Row | null): Row | null {
   if (!row) return null;
   return Object.fromEntries(attributes[model].map(key => [key, row[key] ?? null]));
 }
-function truthy(value: any): boolean { return value !== null && value !== undefined && value !== false && value !== 0 && value !== '' && value !== '0'; }
+function truthy(value: any): boolean { return value !== null && value !== undefined && value !== false && value !== 0 && value !== '' && value !== '0' && !(typeof value === 'object' && Object.keys(value).length === 0); }
 function requiredScalar(value: any, name: string): string {
-  if (!truthy(value)) throw new ApiError(400, `${name} is required`);
+  if (!truthy(value)) throw new ApiError(400, `${name} is required`, undefined, 'HttpException');
   if (typeof value !== 'string' && typeof value !== 'number') throw new ApiError(400, `${name} must be a string`);
   return String(value);
 }
@@ -111,7 +111,7 @@ async function getFile(s: Services, token: string, key: string | undefined, appl
 export async function refresh(s: Services, ctx: Context, authenticatedUser?: Row): Promise<Row> {
   const token = requiredScalar(ctx.body.token, 'token');
   const values = ['uuid', 'id', 'key'].filter(key => truthy(ctx.body[key]));
-  if (values.length !== 1) throw new ApiError(400, 'Exactly one of uuid, id, or key must be provided');
+  if (values.length !== 1) throw new ApiError(400, 'Exactly one of uuid, id, or key must be provided', undefined, 'HttpException');
   const kind = values[0], value = requiredScalar(ctx.body[kind], kind);
   await s.auth.requireDevice(ctx);
   const version = kind === 'uuid' ? reportedVersion(ctx.body) : 0;
@@ -134,7 +134,8 @@ export async function refresh(s: Services, ctx: Context, authenticatedUser?: Row
   return { data: Object.keys(data).length ? data : [], success: truthy(ctx.query.expand), message: truthy(ctx.query.expand) ? 'success' : 'need expand' };
 }
 export async function log(s: Services, token: any): Promise<Row> {
-  token = requiredScalar(token, 'token');
+  if (token === undefined || token === null) throw new ApiError(400, 'Missing required parameters: token');
+  token = String(token);
   const [checkin, report, file] = await Promise.all([s.redis.find('applet', token), s.redis.find('report', token), s.redis.find('recode_file', token)]);
   return { success: true, message: 'success', data: { checkin: redisRow('applet', checkin), report: redisRow('report', report), file: redisRow('recode_file', file) } };
 }

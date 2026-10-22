@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import type { Context, Row, Services } from '../src/core/contracts';
 import { ApiRouter } from '../src/core/router';
 import { registerV2 } from '../src/v2';
+import { errorPayload } from '../src/core/errors';
 
 class FilesDb {
   sqlite = new DatabaseSync(':memory:');
@@ -62,6 +63,14 @@ describe('current mini program file ownership',()=>{
 });
 
 describe('file payment service',()=>{
+  it('retains the generic Yii HTTP exception type used by file ownership and payment guards',async()=>{
+    const {MiniProgramFileService}=await import('../src/v2/file-service');
+    const files=new MiniProgramFileService(new FilesDb());
+    try {await files.findOwned('bad',user);throw new Error('Expected file id rejection');}
+    catch(error) {expect(errorPayload(error).body).toMatchObject({status:400,message:'文件编号无效',type:'yii\\web\\HttpException'});}
+    try {files.prepareOrder({id:1,price:null},user);throw new Error('Expected price rejection');}
+    catch(error) {expect(errorPayload(error).body).toMatchObject({status:422,message:'该历史文件尚未确认收费金额，请联系管理员',type:'yii\\web\\HttpException'});}
+  });
   async function service() {const f=await fixture();const module=await import('../src/v2/file-service').catch(()=>({} as any));expect(module.MiniProgramFileService).toBeTypeOf('function');return {...f,files:new module.MiniProgramFileService(f.db),price:module.priceInCents};}
   it('validates integer cents without multiplying units or inventing a historical price',async()=>{
     const f=await service();

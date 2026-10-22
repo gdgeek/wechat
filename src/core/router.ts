@@ -1,4 +1,5 @@
 import type { Context, Handler, Route } from './contracts';
+import { unescape } from 'node:querystring';
 export class ApiRouter {
   readonly routes: Route[] = [];
   private readonly compiled: Array<{ route: Route; regex: RegExp; names: string[] }> = [];
@@ -11,19 +12,23 @@ export class ApiRouter {
         if (!part.startsWith(':')) return part.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const name = part.slice(1); names.push(name);
         if (path.includes('/tickets/') && name === 'id') return '([a-f0-9]{32})';
-        return ['id', 'device_id', 'user_id'].includes(name) ? '(\\d[\\d,]*)' : '([^/]+)';
+        if (path.startsWith('/admin-api/') && name === 'id') return '(\\d+)';
+        return name === 'id' ? '(\\d[\\d,]*)' : '([^/]+)';
       }).join('/');
       this.routes.push(route);
-      this.compiled.push({ route, regex: new RegExp(`^${pattern}/?$`), names });
+      this.compiled.push({ route, regex: new RegExp(`^${pattern}$`), names });
     }
   }
   match(method: string, path: string): { route: Route; params: Record<string, string> } | null {
+    // Yii Request decodes the whole path before UrlRule matching. In particular,
+    // encoded slashes are separators, and a literal plus becomes a space.
+    path = unescape(path.replace(/\+/g, ' '));
     const candidates = this.compiled.filter(item => item.route.method === method);
     // Yii REST extraPatterns take precedence over /:id regardless of registration order.
     candidates.sort((a, b) => a.names.length - b.names.length);
     for (const item of candidates) {
       const match = item.regex.exec(path);
-      if (match) return { route: item.route, params: Object.fromEntries(item.names.map((name, i) => [name, decodeURIComponent(match[i + 1])])) };
+      if (match) return { route: item.route, params: Object.fromEntries(item.names.map((name, i) => [name, match[i + 1]])) };
     }
     return null;
   }

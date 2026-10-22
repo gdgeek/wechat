@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createCipheriv, generateKeyPairSync, sign, verify } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
+import { xmlResponse } from '../src/core/serialization';
 import { ApiRouter } from '../src/core/router';
 import type { Context, Row, Services } from '../src/core/contracts';
 import { Integrations, registerIntegrations } from '../src/integrations/integrations';
@@ -50,7 +51,7 @@ function setup(overrides: Partial<IntegrationOptions> = {}, reserved = true) {
   const services = { db, integrations: api, auth: { bearer: async () => ({ id: 7, openid: 'payer', unionid: 'union' }) } } as unknown as Services;
   registerIntegrations(router, services);
   const responseStatuses: number[] = [];
-  const res = { status(status: number) { responseStatuses.push(status); return res; } };
+  const res = { setHeader: vi.fn(), status(status: number) { responseStatuses.push(status); return res; } };
   const call = async (method: string, path: string, body: Row = {}, query: Row = {}, rawBody = '', headers: Row = {}) => router.match(method, path)!.route.handler({ body, query, params: {}, req: { headers, rawBody: Buffer.from(rawBody), protocol: 'https', get: () => 'legacy.example.test' }, res } as unknown as Context);
   const file = () => db.one('SELECT * FROM file WHERE id = ?', [1]);
   return { requests, call, provider, db, file, responseStatuses, reservationsAtProvider };
@@ -93,6 +94,17 @@ describe('payment endpoints with cryptographic provider transport', () => {
     } finally { vi.unstubAllEnvs(); }
   });
 
+  it('preserves explicitly supplied empty descriptions and refund reasons', async () => {
+    const f = setup();
+    for (const description of ['', null, false, 0]) {
+      await f.call('POST', '/v1/wechat-pay/wxpay-order', { openid: 'payer', out_trade_no: 'order01', amount: 100, description });
+      expect(f.requests.at(-1)!.body!.description).toBe(description);
+    }
+    for (const reason of [null, false, 0]) {
+      await f.call('POST', '/v1/wechat-pay/wxpay-refund', { out_trade_no: 'order01', out_refund_no: 'refund1', refund_amount: 50, total_amount: 100, reason });
+      expect(f.requests.at(-1)!.body!.reason).toBe(reason);
+    }
+  });
   it('orders and queries through signed APIv3 and preserves v1/v2 response shape', async () => {
     const { requests, call } = setup();
     for (const version of ['v1', 'v2']) {
@@ -123,8 +135,12 @@ describe('payment endpoints with cryptographic provider transport', () => {
     const { call } = setup();
     for (const version of ['v1', 'v2']) {
       const paid = notice(false), refund = notice(true);
-      expect(await call('POST', `/${version}/wechat-pay/notify`, {}, {}, paid.raw, paid.headers)).toEqual({ code: 'SUCCESS', message: '成功' });
-      expect(await call('POST', `/${version}/wechat-pay/refund-notify`, {}, {}, refund.raw, refund.headers)).toEqual({ code: 'SUCCESS', message: '成功' });
+      const paidResponse = await call('POST', `/${version}/wechat-pay/notify`, {}, {}, paid.raw, paid.headers);
+      expect(paidResponse).toEqual(version === 'v2' ? { code: 'SUCCESS', message: '成功' } : {});
+      if (version === 'v1') expect(xmlResponse(paidResponse)).toContain('<response><Server/></response>');
+      const refundedResponse = await call('POST', `/${version}/wechat-pay/refund-notify`, {}, {}, refund.raw, refund.headers);
+      expect(refundedResponse).toEqual({});
+      expect(xmlResponse(refundedResponse)).toContain('<response><Server/></response>');
       await expect(call('POST', `/${version}/wechat-pay/refund-notify`, {}, {}, paid.raw, paid.headers)).rejects.toThrow('类型不匹配');
       const wrongMerchant = notice(false, 'attacker');
       await expect(call('POST', `/${version}/wechat-pay/notify`, {}, {}, wrongMerchant.raw, wrongMerchant.headers)).rejects.toThrow('商户身份不匹配');
@@ -207,10 +223,11 @@ describe('payment endpoints with cryptographic provider transport', () => {
     expect(f.requests).toHaveLength(0);
   });
 
-  it('requeries WeChat after an authentic v2 callback and ignores callback success until the queried order succeeds', async () => {
+  it('requires a retry when an authentic v2 callback query is not yet confirmed', async () => {
     const f = setup(); const paid = notice();
     f.provider.order.trade_state = 'NOTPAY';
-    expect(await f.call('POST', '/v2/wechat-pay/notify', {}, {}, paid.raw, paid.headers)).toEqual({ code: 'SUCCESS', message: '成功' });
+    expect(await f.call('POST', '/v2/wechat-pay/notify', {}, {}, paid.raw, paid.headers)).toEqual({ code: 'ERROR', message: '支付结果尚未确认，请重试通知' });
+    expect(f.responseStatuses.at(-1)).toBe(500);
     expect(f.requests.at(-1)?.url.pathname).toBe('/v3/pay/transactions/out-trade-no/order01');
     expect((await f.file())!.unlocked).toBe(0);
     f.provider.order.trade_state = 'SUCCESS';
@@ -287,13 +304,16 @@ describe('payment endpoints with cryptographic provider transport', () => {
   it('resolves callback users from the local reservation before querying WeChat, independently of attach', async () => {
     const f = setup(); const paid = notice();
     f.provider.order = { appid: appId, mchid: 'merchant', out_trade_no: 'order01', trade_state: 'NOTPAY', attach: '{"user_id":999}' };
-    expect(await f.call('POST', '/v2/wechat-pay/notify', {}, {}, paid.raw, paid.headers)).toEqual({ code: 'SUCCESS', message: '成功' });
+    expect(await f.call('POST', '/v2/wechat-pay/notify', {}, {}, paid.raw, paid.headers)).toEqual({ code: 'ERROR', message: '支付结果尚未确认，请重试通知' });
+    expect(f.responseStatuses.at(-1)).toBe(500);
     expect((await f.file())!.unlocked).toBe(0);
     f.provider.order.out_trade_no = 'different-order';
     expect(await f.call('POST', '/v2/wechat-pay/notify', {}, {}, paid.raw, paid.headers)).toEqual({ code: 'ERROR', message: '查询订单编号不一致' });
+    expect(f.responseStatuses.at(-1)).toBe(500);
     const requests = f.requests.length;
     await f.db.execute('DELETE FROM file_payment_order');
     expect(await f.call('POST', '/v2/wechat-pay/notify', {}, {}, paid.raw, paid.headers)).toEqual({ code: 'ERROR', message: '订单账号不存在' });
+    expect(f.responseStatuses.at(-1)).toBe(500);
     expect(f.requests).toHaveLength(requests);
   });
 });

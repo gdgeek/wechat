@@ -246,6 +246,65 @@ test('v1 Redis responses include every declared attribute and hide v2-only field
 });
 
 describe('v1 Yii serialization regressions',()=>{
+  test('custom system mutations return the saved player model with its SQL timestamp expression',async()=>{
+    await boot();const timestamp={expression:'NOW()',params:[]};
+    expect((await call('POST','/v1/system/give',{targetId:2,money:10})).player.updated_at).toEqual(timestamp);
+    expect((await call('POST','/v1/system/deduct-points',{targetId:2,points:1})).player.updated_at).toEqual(timestamp);
+    const ready=await call('GET','/v1/system/ready-game',{}, {targetId:2,deviceId:1});
+    expect((await call('POST','/v1/system/close-record',{recordId:ready.record.id})).player.updated_at).toEqual(timestamp);
+  });
+  test('PHP-empty JSON containers fail required checkin inputs without creating Redis state',async()=>{
+    await boot();
+    for(const token of [[],{}]) await expect(call('POST','/v1/checkin/status-ready',{token,openid:'owner'})).rejects.toMatchObject({status:400,message:'token is required'});
+    expect(await redis.all('checkin')).toEqual([]);
+  });
+  test('optional numeric empty strings remain strings in the response and persist as null',async()=>{
+    await boot();
+    expect(await call('PATCH','/v1/player/:id',{recharge:'',points:''},{},{id:'2'})).toMatchObject({recharge:'',points:''});
+    expect(await db.one('SELECT recharge,points FROM player WHERE id=2')).toEqual({recharge:null,points:null});
+  });
+  test('reservation rejects fractional operation balances before charging or creating a record',async()=>{
+    await boot();await db.update('shop',1,{rate:75});
+    await expect(call('GET','/v1/system/ready-game',{}, {targetId:2,deviceId:1})).rejects.toMatchObject({status:400,message:'Invalid parameters[]'});
+    expect((await db.one('SELECT * FROM player WHERE id=2'))!.cost).toBe(0);
+    expect(await db.one('SELECT pool,income,turnover FROM operation WHERE id=1')).toEqual({pool:0,income:0,turnover:0});
+    expect(await db.one('SELECT * FROM record')).toBeNull();
+  });
+  test('REST saves serialize the current Yii model attributes without reloading defaults or coercing inputs',async()=>{
+    await boot();const timestamp={expression:'NOW()',params:[]};
+    expect(await call('POST','/v1/game',{})).toEqual({id:2,version:1,status:'unset'});
+    const player=await call('POST','/v1/player',{tel:'fresh',points:'3'});
+    expect(player).toEqual({id:3,tel:'fresh',points:'3',created_at:timestamp,updated_at:timestamp});
+    expect((await db.one('SELECT * FROM player WHERE id=3'))!.points).toBe(3);
+    expect(await call('PATCH','/v1/player/:id',{points:'4'},{},{id:'3'})).toMatchObject({points:'4',updated_at:timestamp});
+  });
+  test('REST validation preserves Yii labels, first-error ordering, and duplicate values',async()=>{
+    await boot();
+    await expect(call('POST','/v1/player',{tel:'  '})).rejects.toMatchObject({status:422,response:[{field:'tel',message:'Tel cannot be blank.'}]});
+    await expect(call('POST','/v1/player',{tel:'new',recharge:true,points:'1.2',avatar:false})).rejects.toMatchObject({status:422,response:[
+      {field:'recharge',message:'Recharge must be a number.'},{field:'points',message:'Points must be an integer.'},{field:'avatar',message:'Avatar must be a string.'}
+    ]});
+    await expect(call('POST','/v1/player',{tel:'player'})).rejects.toMatchObject({status:422,response:[{field:'tel',message:'Tel "player" has already been taken.'}]});
+    await call('POST','/v1/award',{shop_id:1,type:'small'});
+    await expect(call('POST','/v1/award',{shop_id:1,type:'small'})).rejects.toMatchObject({status:422,response:[{field:'shop_id',message:'The combination "1"-"small" of Shop ID and Type has already been taken.'}]});
+  });
+  test('custom signup and game device validation retain the source HTTP 400 envelopes',async()=>{
+    await boot();
+    await expect(call('POST','/v1/common/sign-up',{tel:' ',openId:'new'})).rejects.toMatchObject({status:400,message:'Invalid parameters{"tel":["Tel cannot be blank."]}'});
+    await expect(call('GET','/v1/game/device',{}, {uuid:'x'.repeat(256)})).rejects.toMatchObject({status:400,message:'Invalid device:{"uuid":["Uuid should contain at most 255 characters."]}'});
+  });
+  test('local log accepts a present empty token and rejects only a missing action parameter',async()=>{
+    await boot();
+    expect(await call('GET','/v1/local/log',{}, {token:''})).toEqual({success:true,message:'success',data:{checkin:null,report:null,file:null}});
+    await expect(call('GET','/v1/local/log')).rejects.toMatchObject({status:400,message:'Missing required parameters: token'});
+  });
+  test('game device lookup applies the legacy second URL decode before finding or creating a device',async()=>{
+    await boot();await db.update('device',1,{uuid:'device 1'});
+    expect((await call('GET','/v1/game/device',{}, {uuid:'device+1'})).device.id).toBe(1);
+    expect((await call('GET','/v1/game/device',{}, {uuid:'device%201'})).device.id).toBe(1);
+    expect(await db.query('SELECT * FROM device')).toHaveLength(1);
+    expect((await call('GET','/v1/game/device',{}, {uuid:'device&literal=value'})).device.uuid).toBe('device&literal=value');
+  });
   test('numeric balance fields reject JSON booleans and arrays before writing',async()=>{
     await boot();const original=await db.one('SELECT * FROM player WHERE id = 2');
     for (const field of ['recharge','cost','give']) {
@@ -255,13 +314,15 @@ describe('v1 Yii serialization regressions',()=>{
       }
     }
   });
-  test('optional numeric fields skip empty array validation and cast them to zero as Yii does',async()=>{
+  test('optional numeric fields preserve raw empty array responses and persist zero as Yii does',async()=>{
     await boot();
-    expect(await call('PATCH','/v1/player/:id',{recharge:[],cost:[],give:[],points:[],times:[],grade:[]},{},{id:'2'})).toMatchObject({recharge:0,cost:0,give:0,points:0,times:0,grade:0});
+    expect(await call('PATCH','/v1/player/:id',{recharge:[],cost:[],give:[],points:[],times:[],grade:[]},{},{id:'2'})).toMatchObject({recharge:[],cost:[],give:[],points:[],times:[],grade:[]});
+    expect(await db.one('SELECT recharge,cost,give,points,times,grade FROM player WHERE id=2')).toEqual({recharge:0,cost:0,give:0,points:0,times:0,grade:0});
   });
   test('numeric balance fields retain Yii decimal and exponent string support',async()=>{
     await boot();
-    expect((await call('PATCH','/v1/player/:id',{recharge:'1.25e2',cost:'.5',give:'-2.5'},{},{id:'2'}))).toMatchObject({recharge:125,cost:.5,give:-2.5});
+    expect((await call('PATCH','/v1/player/:id',{recharge:'1.25e2',cost:'.5',give:'-2.5'},{},{id:'2'}))).toMatchObject({recharge:'1.25e2',cost:'.5',give:'-2.5'});
+    expect(await db.one('SELECT recharge,cost,give FROM player WHERE id=2')).toEqual({recharge:125,cost:.5,give:-2.5});
   });
   test('integer fields reject numeric JSON arrays instead of coercing them',async()=>{
     await boot();

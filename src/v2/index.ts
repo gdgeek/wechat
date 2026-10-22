@@ -29,7 +29,7 @@ export function registerV2(router: ApiRouter, s: Services): void {
     const user = await bearer(ctx);
     const deviceId = bodyDeviceId(ctx.body.device_id);
     await controlledDevice(s, user, deviceId);
-    const data = await validate(s, 'setup', { ...ctx.body, device_id: deviceId });
+    const data = await validate(s, 'setup', ctx.body);
     const saved = await saveResource(s, 'setup', data);
     ctx.res.status(201); ctx.res.setHeader('Location', absoluteLocation(ctx, `/v2/setups/${saved.id}`));
     return serialize(s, 'setup', saved, ctx.query);
@@ -60,7 +60,7 @@ export function registerV2(router: ApiRouter, s: Services): void {
   router.add(['PUT', 'PATCH'], '/v2/files/:id', () => { throw new ApiError(404, 'Page not found.'); });
 
   for (const [path, field] of [['device', 'uuid'], ['applet', 'id'], ['file', 'key']]) router.add('POST', `/v2/server/${path}`, async ctx => {
-    if (ctx.body[field] === undefined || ctx.body[field] === null) throw new ApiError(400, `${field} is required`);
+    if (ctx.body[field] === undefined || ctx.body[field] === null) throw new ApiError(400, `${field} is required`, undefined, 'HttpException');
     return refresh(s, ctx);
   });
   router.add(['GET', 'POST'], '/v2/server/refresh', ctx => refresh(s, ctx));

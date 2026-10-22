@@ -33,10 +33,10 @@ function environment(): IntegrationOptions {
     notifyUrl: env.WECHAT_PAY_NOTIFY_URL,
     refundNotifyUrl: env.WECHAT_PAY_REFUND_NOTIFY_URL,
     secretId: env.TENCENT_SECRET_ID || env.SECRET_ID, secretKey: env.TENCENT_SECRET_KEY || env.SECRET_KEY,
-    bucket: env.COS_BUCKET || env.COS_BUCKETS_BUCKET, region: env.COS_REGION || env.COS_BUCKETS_REGION || 'ap-nanjing',
+    bucket: env.COS_BUCKET || env.COS_BUCKETS_BUCKET, region: env.COS_REGION || env.COS_BUCKETS_REGION,
   };
 }
-function failure(status: number, message: string): never { throw new HttpException(message, status); }
+function failure(status: number, message: string, yiiType = 'HttpException'): never { throw Object.assign(new HttpException(message, status), { yiiType }); }
 function record(value: unknown): value is Row { return !!value && typeof value === 'object' && !Array.isArray(value); }
 function enc(value: string): string { return encodeURIComponent(value).replace(/[!'()*]/g, character => `%${character.charCodeAt(0).toString(16).toUpperCase()}`); }
 const sha256 = (value: string) => createHash('sha256').update(value).digest('hex');
@@ -76,11 +76,11 @@ export class Integrations {
   }
 
   async codeSession(code: string): Promise<Row> {
-    if (typeof code !== 'string' || !code || code.length > 1024) return failure(400, 'code is required');
+    if (typeof code !== 'string' || !code || Buffer.byteLength(code) > 1024) return failure(400, 'code is required');
     this.required('appId', 'appSecret');
     const query = new URLSearchParams({ appid: this.config.appId!, secret: this.config.appSecret!, js_code: code, grant_type: 'authorization_code' });
     const result = await this.wechat(`/sns/jscode2session?${query}`);
-    if (typeof result.openid !== 'string' || !result.openid) return failure(401, '微信登录失败，请重新登录');
+    if (typeof result.openid !== 'string' || !result.openid) return failure(401, '微信登录失败，请重新登录', 'UnauthorizedHttpException');
     return result;
   }
 
@@ -146,7 +146,7 @@ export class Integrations {
     const notifyUrl = this.config.notifyUrl || fallbackNotifyUrl;
     if (!notifyUrl) return failure(503, '外部服务配置不完整');
     const result = await this.payment('POST', '/v3/pay/transactions/jsapi', {
-      appid: this.config.appId, mchid: this.config.mchId, description: input.description || '商品支付',
+      appid: this.config.appId, mchid: this.config.mchId, description: input.description === undefined ? '商品支付' : input.description,
       out_trade_no: input.out_trade_no, notify_url: notifyUrl,
       ...(typeof input.attach === 'string' ? { attach: input.attach } : {}),
       amount: { total: Number(input.amount), currency: 'CNY' }, payer: { openid: input.openid },
@@ -183,8 +183,7 @@ export class Integrations {
   }
 
   cloud(): Row {
-    this.required('bucket', 'region');
-    return { bucket: this.config.bucket, region: this.config.region };
+    return { bucket: this.config.bucket ?? false, region: this.config.region ?? false };
   }
 
   async federationToken(bucket = this.config.bucket, region = this.config.region): Promise<Row> {
@@ -211,11 +210,11 @@ export class Integrations {
     return { message: 'success', success: true, data: { ...this.cloud(), token: result.Credentials.Token, tmpSecretId: result.Credentials.TmpSecretId, tmpSecretKey: result.Credentials.TmpSecretKey, startTime: this.now(), expiredTime: result.ExpiredTime, expiration: result.Expiration ?? null, requestId: result.RequestId } };
   }
 
-  async objectUrl(key: string, query: Row = {}): Promise<string> {
-    return this.signedObjectUrl(key, query);
+  async objectUrl(key: string, query: Row = {}, expiresAt?: number): Promise<string> {
+    return this.signedObjectUrl(key, query, {}, expiresAt);
   }
 
-  private async signedObjectUrl(key: string, query: Row = {}, extraHeaders: Record<string, string> = {}): Promise<string> {
+  private async signedObjectUrl(key: string, query: Row = {}, extraHeaders: Record<string, string> = {}, expiresAt?: number): Promise<string> {
     this.required('secretId', 'secretKey', 'bucket', 'region');
     if (typeof key !== 'string' || !key || key.length > 1024 || key.split('/').some(part => part === '..' || part === '.') || /[\u0000-\u001f\\]/.test(key)) return failure(400, 'key is invalid');
     const expires = query.expires === undefined ? 900 : Number(query.expires);
@@ -223,7 +222,7 @@ export class Integrations {
     if (!Number.isInteger(expires) || expires < 1 || expires > 86400) return failure(400, 'expires must be between 1 and 86400');
     if (!['GET', 'HEAD', 'PUT'].includes(method)) return failure(400, 'method must be GET, HEAD or PUT');
     let secretId = this.config.secretId!, secretKey = this.config.secretKey!, token: string | undefined;
-    let end = this.now() + expires;
+    let end = expiresAt ?? this.now() + expires;
     if (String(query.force_sts || '') === '1') {
       const sts = await this.federationToken();
       secretId = sts.Credentials.TmpSecretId; secretKey = sts.Credentials.TmpSecretKey; token = sts.Credentials.Token;

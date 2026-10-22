@@ -13,30 +13,30 @@ export function canonicalOrigin(value = process.env.ADMIN_SCAN_LOGIN_ORIGIN || '
 export class ScanTickets {
   constructor(private readonly s: Services, private readonly auth: AdminAuth) {}
   enabled(): boolean { return canonicalOrigin() !== null; }
-  private origin(): string { const origin = canonicalOrigin(); if (!origin) throw new ApiError(503, '扫码登录尚未配置'); return origin; }
+  private origin(): string { const origin = canonicalOrigin(); if (!origin) throw new ApiError(503, '扫码登录尚未配置', undefined, 'HttpException'); return origin; }
   private now(): number { return Math.floor(Date.now() / 1000); }
   private owner(ctx: Context, required = true): string | null {
     const proof = ctx.req.headers['x-admin-scan-owner'];
     if (typeof proof === 'string' && /^[a-f0-9]{64}$/.test(proof)) return sha256(proof);
-    if (required) throw new ApiError(400, '扫码浏览器凭据无效');
+    if (required) throw new ApiError(400, '扫码浏览器凭据无效', undefined, 'HttpException');
     return null;
   }
   private async database<T>(operation: () => Promise<T>): Promise<T> {
     try { return await operation(); }
-    catch (error) { if (error instanceof ApiError) throw error; throw new ApiError(503, '扫码登录暂时不可用，请稍后重试'); }
+    catch (error) { if (error instanceof ApiError) throw error; throw new ApiError(503, '扫码登录暂时不可用，请稍后重试', undefined, 'HttpException'); }
   }
   private async ticket(id: string): Promise<Row> {
-    if (!/^[a-f0-9]{32}$/.test(id)) throw new ApiError(404, '二维码不存在');
+    if (!/^[a-f0-9]{32}$/.test(id)) throw new ApiError(404, '二维码不存在', undefined, 'HttpException');
     await this.s.db.execute("UPDATE admin_scan_login_ticket SET status='expired' WHERE id=? AND status IN ('pending','approved') AND expires_at<=?", [id, this.now()]);
     const row = await this.s.db.one('SELECT * FROM admin_scan_login_ticket WHERE id=?', [id]);
-    if (!row) throw new ApiError(404, '二维码不存在');
+    if (!row) throw new ApiError(404, '二维码不存在', undefined, 'HttpException');
     return row;
   }
-  private owned(row: Row, ownerHash: string): void { if (!equal(row.owner_hash, ownerHash)) throw new ApiError(404, '二维码不存在'); }
-  private audience(row: Row): void { const origin = canonicalOrigin(); if (!origin || !equal(row.audience, origin)) throw new ApiError(403, '二维码目标环境不匹配'); }
+  private owned(row: Row, ownerHash: string): void { if (!equal(row.owner_hash, ownerHash)) throw new ApiError(404, '二维码不存在', undefined, 'HttpException'); }
+  private audience(row: Row): void { const origin = canonicalOrigin(); if (!origin || !equal(row.audience, origin)) throw new ApiError(403, '二维码目标环境不匹配', undefined, 'HttpException'); }
   private requireState(row: Row, expected: string): void {
-    if (row.status === 'expired') throw new ApiError(410, '二维码已过期，请刷新');
-    if (row.status !== expected) throw new ApiError(409, '二维码未确认、已使用或已取消');
+    if (row.status === 'expired') throw new ApiError(410, '二维码已过期，请刷新', undefined, 'HttpException');
+    if (row.status !== expected) throw new ApiError(409, '二维码未确认、已使用或已取消', undefined, 'HttpException');
   }
   private state(row: Row): Row { return { status: row.status, expiresAt: new Date(Number(row.expires_at) * 1000).toISOString().replace('.000Z', '+00:00') }; }
   async cancelCurrent(ctx: Context): Promise<void> {
@@ -64,20 +64,19 @@ export class ScanTickets {
     const ownerHash = this.owner(ctx)!;
     return this.database(async () => { const row = await this.ticket(ctx.params.id); this.owned(row, ownerHash); this.audience(row); return this.state(row); });
   }
-  async approve(ctx: Context): Promise<Row> {
+  async approve(ctx: Context, user: Row): Promise<Row> {
     this.origin();
-    const user = await this.s.auth.bearer(ctx, 'v2-user');
     await throttle(this.s.db, ctx, `scan:approve:${user.id}:${ctx.req.ip ?? 'unknown'}`, 30, 60);
     await this.auth.requireWechatUser(Number(user.id));
     return this.database(() => this.s.db.transaction(async db => {
       const row = await this.ticket(ctx.params.id);
       this.audience(row);
-      if (typeof ctx.body.secret !== 'string' || !/^[a-f0-9]{64}$/.test(ctx.body.secret) || !equal(row.secret_hash, sha256(ctx.body.secret))) throw new ApiError(403, '无效的扫码登录凭据');
+      if (typeof ctx.body.secret !== 'string' || !/^[a-f0-9]{64}$/.test(ctx.body.secret) || !equal(row.secret_hash, sha256(ctx.body.secret))) throw new ApiError(403, '无效的扫码登录凭据', undefined, 'HttpException');
       this.requireState(row, 'pending');
       await this.auth.requireWechatUser(Number(user.id));
       const now = this.now();
       const changed = await db.execute("UPDATE admin_scan_login_ticket SET status='approved',approved_user_id=?,approved_at=? WHERE id=? AND status='pending' AND audience=? AND expires_at>?", [user.id, now, row.id, this.origin(), now]);
-      if (changed.affectedRows !== 1) throw new ApiError(409, '二维码状态已变化，请刷新');
+      if (changed.affectedRows !== 1) throw new ApiError(409, '二维码状态已变化，请刷新', undefined, 'HttpException');
       return { status: 'approved' };
     }));
   }
@@ -90,7 +89,7 @@ export class ScanTickets {
       const userId = Number(row.approved_user_id); await this.auth.requireWechatUser(userId);
       const now = this.now();
       const changed = await db.execute("UPDATE admin_scan_login_ticket SET status='consumed',consumed_at=? WHERE id=? AND status='approved' AND owner_hash=? AND audience=? AND approved_user_id=? AND expires_at>?", [now, row.id, ownerHash, this.origin(), userId, now]);
-      if (changed.affectedRows !== 1) throw new ApiError(409, '二维码已使用或已过期');
+      if (changed.affectedRows !== 1) throw new ApiError(409, '二维码已使用或已过期', undefined, 'HttpException');
       await this.auth.tokens.store.assertOwnerLock(ownerHash);
       return userId;
     })));

@@ -1,5 +1,6 @@
 import { createHash, createSecretKey, timingSafeEqual, type KeyObject } from 'node:crypto';
 import { readFileSync } from 'node:fs';
+import { unescape } from 'node:querystring';
 import jwt from 'jsonwebtoken';
 import type { Context, Row } from './contracts';
 import type { Database } from './database';
@@ -43,11 +44,23 @@ export class AuthService {
   }
   async bearer(ctx: Context, domain: IdentityDomain): Promise<Row> {
     const header = ctx.req.headers.authorization;
-    const match = typeof header === 'string' ? /^Bearer\s+(.+)$/i.exec(header) : null;
-    if (!match) { ctx.res.setHeader('WWW-Authenticate', 'Bearer realm="api"'); throw new ApiError(401, 'Your request was made with invalid credentials.'); }
-    return this.verifyToken(match[1], domain);
+    const match = typeof header === 'string' ? /^Bearer\s+(.+)$/.exec(header) : null;
+    const fail = () => {
+      ctx.res.setHeader('WWW-Authenticate', 'Bearer realm="api"');
+      const directJwt = /^\/v2\/(?:devices|setups|root|web-login)(?:\/|$)/.test(unescape((ctx.req.path ?? '').replace(/\+/g, ' ')));
+      throw new ApiError(401, directJwt ? 'Your request was made with invalid or expired JSON Web Token.' : 'Your request was made with invalid credentials.');
+    };
+    if (!match) return fail();
+    try { return await this.verifyToken(match[1], domain); }
+    catch (error) { if (error instanceof ApiError && error.status === 401) return fail(); throw error; }
   }
-  async refresh(token: string, domain: IdentityDomain, issuer: string): Promise<TokenPair> { return this.issue(await this.verifyToken(token, domain), domain, issuer); }
+  async refresh(token: string, domain: IdentityDomain, issuer: string): Promise<TokenPair> {
+    try { return this.issue(await this.verifyToken(token, domain), domain, issuer); }
+    catch (error) {
+      if (error instanceof ApiError && error.status === 401) throw new ApiError(401, 'Invalid or expired refreshToken');
+      throw error;
+    }
+  }
   requireDevice(ctx: Context): void {
     const body = ctx.body;
     if (!body.token) throw new ApiError(400, 'token is required');
@@ -61,7 +74,8 @@ export class AuthService {
   }
   playerFingerprint(ctx: Context): void {
     const data = ctx.req.method === 'GET' ? ctx.query : ctx.body;
-    if (!data.openId || !data.timestamp || !data.fingerprint || !this.equal(createHash('md5').update(`geek.v0xe1.pa2ty.c0m${data.timestamp}${data.openId}`).digest('hex'), data.fingerprint)) throw new ApiError(401, 'Your request was made with invalid credentials.');
+    const decode = (value: unknown) => unescape(String(value).replace(/\+/g, ' '));
+    if (![data.openId, data.timestamp, data.fingerprint].every(value => typeof value === 'string' || typeof value === 'number') || !this.equal(createHash('md5').update(`geek.v0xe1.pa2ty.c0m${decode(data.timestamp)}${decode(data.openId)}`).digest('hex'), decode(data.fingerprint))) throw new ApiError(401, 'Your request was made with invalid credentials.');
   }
   private equal(left: string, right: unknown): boolean { return typeof right === 'string' && Buffer.byteLength(left) === Buffer.byteLength(right) && timingSafeEqual(Buffer.from(left), Buffer.from(right)); }
 }
