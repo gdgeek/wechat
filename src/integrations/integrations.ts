@@ -30,7 +30,7 @@ function environment(): IntegrationOptions {
     mchId: env.WECHAT_PAY_MCH_ID || env.WECHAT_MCH_ID, serialNo,
     privateKey: pem(env.WECHAT_PAY_PRIVATE_KEY, env.WECHAT_PAY_PRIVATE_KEY_PATH || env.WECHAT_PRIVATE_KEY),
     apiV3Key: env.WECHAT_PAY_API_V3_KEY || env.WECHAT_SECRET_KEY, platformKeys: keys, platformKeyId: publicKeyId,
-    notifyUrl: env.WECHAT_PAY_NOTIFY_URL || (env.PUBLIC_ORIGIN ? `${env.PUBLIC_ORIGIN.replace(/\/$/, '')}/v1/wechat-pay/notify` : undefined),
+    notifyUrl: env.WECHAT_PAY_NOTIFY_URL,
     refundNotifyUrl: env.WECHAT_PAY_REFUND_NOTIFY_URL,
     secretId: env.TENCENT_SECRET_ID || env.SECRET_ID, secretKey: env.TENCENT_SECRET_KEY || env.SECRET_KEY,
     bucket: env.COS_BUCKET || env.COS_BUCKETS_BUCKET, region: env.COS_REGION || env.COS_BUCKETS_REGION || 'ap-nanjing',
@@ -148,6 +148,7 @@ export class Integrations {
     const result = await this.payment('POST', '/v3/pay/transactions/jsapi', {
       appid: this.config.appId, mchid: this.config.mchId, description: input.description || '商品支付',
       out_trade_no: input.out_trade_no, notify_url: notifyUrl,
+      ...(typeof input.attach === 'string' ? { attach: input.attach } : {}),
       amount: { total: Number(input.amount), currency: 'CNY' }, payer: { openid: input.openid },
     });
     if (typeof result.prepay_id !== 'string' || !result.prepay_id) return failure(502, '获取prepay_id失败');

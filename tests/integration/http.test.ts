@@ -5,6 +5,7 @@ import type { INestApplication } from '@nestjs/common';
 import { createApplication, createServices } from '../../src/application';
 import { SceneCatalog } from '../../src/admin/scenes';
 import { canonicalOrigin } from '../../src/admin/tickets';
+import { MiniProgramFileService } from '../../src/v2/file-service';
 import { createHash, generateKeyPairSync, randomBytes } from 'node:crypto';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -54,7 +55,7 @@ describe.skipIf(process.env.RUN_INTEGRATION !== '1')('real HTTP + MySQL-compatib
   afterAll(async () => { try { await clearOwnAuthState(); } finally { await app?.close(); if (s) await Promise.allSettled([s.db.close(), s.redis.close(), s.adminAuthRedis?.close()]); if (keyDirectory) rmSync(keyDirectory, { recursive: true, force: true }); } });
   beforeEach(async () => {
     await clearOwnAuthState();
-    for (const table of ['node_browser_session', 'node_rate_limit', 'admin_scan_login_ticket', 'record', 'manager', 'control', 'setup', 'device', 'player', 'user']) await s.db.execute(`DELETE FROM \`${table}\``);
+    for (const table of ['node_browser_session', 'node_rate_limit', 'admin_scan_login_ticket', 'file_payment_order', 'record', 'manager', 'control', 'setup', 'device', 'player', 'file', 'user']) await s.db.execute(`DELETE FROM \`${table}\``);
     await s.db.insert('user', { id: 1, unionid: 'local-test-owner', openid: 'owner-openid' });
     await s.db.insert('user', { id: 2, unionid: 'local-test-other', openid: 'other-openid' });
     await s.db.insert('device', { id: 1, uuid: 'owned-device', tag: 'owned', version: 1 });
@@ -145,6 +146,64 @@ describe.skipIf(process.env.RUN_INTEGRATION !== '1')('real HTTP + MySQL-compatib
     const player = await s.db.insert('player', { tel: 'json-scalar-test', info: true });
     expect(player.info).toBe(true);
     await s.db.delete('player', player.id);
+  });
+  it('lists only current-owned files, keeps the legacy unassigned unionid fallback and blocks arbitrary writes', async () => {
+    await s.db.insert('file', { id: 11, key: 'owned-photo', user_id: 1, unionid: 'another-unionid', price: 250 });
+    await s.db.insert('file', { id: 12, key: 'legacy-photo', user_id: null, unionid: 'local-test-owner', price: null });
+    await s.db.insert('file', { id: 13, key: 'other-photo', user_id: 2, unionid: 'local-test-owner', price: 0 });
+    const auth = `Bearer ${token}`;
+    const listed = await request.get('/v2/files/list?unionid=local-test-other').set('Authorization', auth).expect(200);
+    expect(listed.body.map((row: any) => row.id)).toEqual([12, 11]);
+    expect(listed.body[0].price).toBeNull();
+    expect(listed.headers['x-pagination-total-count']).toBeUndefined();
+    const first = await request.get('/v2/files?per-page=1').set('Authorization', auth).expect(200);
+    expect(first.headers['x-pagination-total-count']).toBe('2');
+    expect(first.body.map((row: any) => row.id)).toEqual([12]);
+    await request.get('/v2/files/13').set('Authorization', auth).expect(404);
+    await request.get('/v2/files/12').set('Authorization', auth).expect(200);
+    await request.post('/v2/files').set('Authorization', auth).send({ key: 'invented', unlocked: 1 }).expect(404);
+    await request.put('/v2/files/11').set('Authorization', auth).send({ unlocked: 1 }).expect(404);
+    await request.patch('/v2/files/11').set('Authorization', auth).send({ price: 0 }).expect(404);
+    expect(await s.db.one('SELECT unlocked,price FROM file WHERE id=11')).toEqual({ unlocked: 0, price: 250 });
+  });
+  it('snapshots integer cents at recording time and never changes an existing file price with later setup edits', async () => {
+    const recording = 'T' + randomBytes(16).toString('hex'), time = '1';
+    const metadata = s.integrations.fileMetadata;
+    s.integrations.fileMetadata = async () => ({ type: 'image/jpeg', md5: 'local-file-md5', size: 10, bucket: 'isolated-test' });
+    const signed = (value: string) => `time=${time}&hash=${createHash('md5').update(`${recording}${time}${value}buj1aban.c0m`).digest('hex')}`;
+    try {
+      await s.db.execute('UPDATE setup SET money=250 WHERE device_id=1');
+      await request.post(`/v2/server/device?${signed('owned-device')}`).send({ token: recording, uuid: 'owned-device' }).expect(200);
+      await request.post(`/v2/applet/refresh?${signed('local-test-owner')}`).set('Authorization', `Bearer ${token}`).send({ token: recording, id: 'local-test-owner' }).expect(200);
+      await request.post(`/v2/server/file?${signed('snapshot-photo')}`).send({ token: recording, key: 'snapshot-photo' }).expect(200);
+      const file = (await s.db.one('SELECT * FROM file WHERE `key`=?', ['snapshot-photo']))!;
+      expect(file).toMatchObject({ price: 250, user_id: 1, unlocked: 0 });
+      await s.db.execute('UPDATE setup SET money=500 WHERE device_id=1');
+      await request.post(`/v2/server/file?${signed('snapshot-photo')}`).send({ token: recording, key: 'snapshot-photo' }).expect(200);
+      expect((await request.get(`/v2/files/${file.id}`).set('Authorization', `Bearer ${token}`).expect(200)).body.price).toBe(250);
+    } finally {
+      s.integrations.fileMetadata = metadata;
+      for (const model of ['report', 'applet', 'recode_file']) await s.redis.remove(model, recording);
+    }
+  });
+  it('reserves immutable case-sensitive file orders atomically before contacting WeChat', async () => {
+    const files = new MiniProgramFileService(s.db), user = (await s.db.one('SELECT * FROM user WHERE id=1'))!;
+    const one = await s.db.insert('file', { key: 'order-photo-one', user_id: 1, price: 250 });
+    const two = await s.db.insert('file', { key: 'order-photo-two', user_id: 1, price: 300 });
+    const results = await Promise.allSettled([
+      files.reserveOrder('ConcurrentOrder', one, user),
+      files.reserveOrder('ConcurrentOrder', two, user),
+    ]);
+    expect(results.filter(result => result.status === 'fulfilled')).toHaveLength(1);
+    expect(results.filter(result => result.status === 'rejected').map((result: any) => result.reason.status)).toEqual([409]);
+    const saved = (await s.db.one('SELECT * FROM file_payment_order WHERE out_trade_no=?', ['ConcurrentOrder']))!;
+    const winner = saved.file_id === one.id ? one : two;
+    await files.reserveOrder('ConcurrentOrder', winner, user);
+    await files.reserveOrder('concurrentorder', winner, user);
+    expect(Number((await s.db.one('SELECT COUNT(*) AS total FROM file_payment_order'))!.total)).toBe(2);
+    expect(await files.assertOrderOwner('ConcurrentOrder', user)).toMatchObject({ file_id: winner.id, amount: winner.price });
+    await expect(files.assertOrderOwner('ConcurrentOrder', { id: 2 })).rejects.toMatchObject({ status: 403 });
+    expect(await s.db.one('SELECT * FROM file_payment_order WHERE out_trade_no=?', ['ConcurrentOrder'])).toEqual(saved);
   });
   it('deletes a device and its current configuration while preserving detached game history', async () => {
     const player = await s.db.insert('player', { tel: 'device-history-player' });

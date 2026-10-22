@@ -3,8 +3,10 @@ import type { ApiRouter } from '../core/router';
 import { ApiError } from '../core/errors';
 import { absoluteLocation, bodyDeviceId, controlledDevice, controlledSetup, denyAdministration, paginate, saveResource, serialize, validate } from './resources';
 import { getInfo, log, refresh } from './server';
+import { MiniProgramFileService } from './file-service';
 
 export function registerV2(router: ApiRouter, s: Services): void {
+  const files = new MiniProgramFileService(s.db);
   const bearer = (ctx: Context) => s.auth.bearer(ctx, 'v2-user');
   const forbidden = async (ctx: Context) => { await bearer(ctx); denyAdministration(); };
   // Register named paths ahead of :id paths, as Yii's extraPatterns does.
@@ -45,31 +47,17 @@ export function registerV2(router: ApiRouter, s: Services): void {
   });
 
   router.add('GET', '/v2/files/list', async ctx => {
-    await bearer(ctx);
-    if (ctx.query.unionid === undefined) throw new ApiError(400, 'Missing required parameters: unionid');
-    if (typeof ctx.query.unionid !== 'string') throw new ApiError(400, 'unionid must be a string');
-    // Returning getModels() rather than the provider omits pagination headers.
-    return paginate(s, ctx, 'file', undefined, false, { where: ctx.query.unionid === '' ? [] : ['unionid LIKE ?'], params: ctx.query.unionid === '' ? [] : [`%${ctx.query.unionid}%`], headers: false });
+    const owner = files.ownedQuery(await bearer(ctx));
+    const rows = await s.db.query(`SELECT * FROM file WHERE ${owner.where} ORDER BY id DESC`, owner.params);
+    return Promise.all(rows.map(row => serialize(s, 'file', row, ctx.query)));
   });
-  router.add('GET', '/v2/files', async ctx => { await bearer(ctx); return paginate(s, ctx, 'file'); });
-  router.add('POST', '/v2/files', async ctx => {
-    await bearer(ctx);
-    const saved = await saveResource(s, 'file', await validate(s, 'file', ctx.body));
-    ctx.res.status(201); ctx.res.setHeader('Location', absoluteLocation(ctx, `/v2/files/${saved.id}`));
-    return serialize(s, 'file', saved, ctx.query);
+  router.add('GET', '/v2/files', async ctx => {
+    const user = await bearer(ctx), owner = files.ownedQuery(user);
+    return paginate(s, ctx, 'file', user, false, { where: [owner.where], params: owner.params });
   });
-  const findFile = async (ctx: Context): Promise<Row> => {
-    await bearer(ctx);
-    const row = await s.db.one('SELECT * FROM file WHERE id = ?', [ctx.params.id]);
-    if (!row) throw new ApiError(404, 'Object not found.');
-    return row;
-  };
-  router.add('GET', '/v2/files/:id', async ctx => serialize(s, 'file', await findFile(ctx), ctx.query));
-  router.add(['PUT', 'PATCH'], '/v2/files/:id', async ctx => {
-    const row = await findFile(ctx);
-    const data = await validate(s, 'file', ctx.body, row);
-    return serialize(s, 'file', await saveResource(s, 'file', data, row), ctx.query);
-  });
+  router.add('GET', '/v2/files/:id', async ctx => serialize(s, 'file', await files.findOwned(ctx.params.id, await bearer(ctx)), ctx.query));
+  router.add('POST', '/v2/files', () => { throw new ApiError(404, 'Page not found.'); });
+  router.add(['PUT', 'PATCH'], '/v2/files/:id', () => { throw new ApiError(404, 'Page not found.'); });
 
   for (const [path, field] of [['device', 'uuid'], ['applet', 'id'], ['file', 'key']]) router.add('POST', `/v2/server/${path}`, async ctx => {
     if (ctx.body[field] === undefined || ctx.body[field] === null) throw new ApiError(400, `${field} is required`);

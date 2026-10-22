@@ -167,12 +167,13 @@ describe('v2 server initialization and rendezvous', () => {
 });
 
 describe('v2 file REST contracts', () => {
-  it('preserves authenticated file CRUD, list filtering, safe mass assignment and no delete action', async () => {
-    const f = await fixture({ file: [{ id: 1, key: 'a', unionid: 'u', md5: 'a' }, { id: 2, key: 'b', unionid: 'v', md5: 'b' }] });
-    expect((await f.request('GET', '/v2/files/list', {}, { unionid: 'u' })).value.map((r: Row) => r.id)).toEqual([1]);
-    const created = await f.request('POST', '/v2/files', { key: 'c', title: 'Clip', ignored: true }); expect(created.status).toBe(201); expect(created.value).not.toHaveProperty('ignored');
-    expect((await f.request('PUT', '/v2/files/1', { title: 'Title' })).value.title).toBe('Title');
-    await expect(f.request('POST', '/v2/files', { key: 'a' })).rejects.toMatchObject({ status: 422 });
+  it('scopes authenticated file reads and disables direct file writes', async () => {
+    const f = await fixture({ file: [{ id: 1, user_id: 1, key: 'a', unionid: 'u', md5: 'a' }, { id: 2, user_id: 2, key: 'b', unionid: 'v', md5: 'b' }] });
+    expect((await f.request('GET', '/v2/files/list', {}, { unionid: 'v' })).value.map((r: Row) => r.id)).toEqual([1]);
+    expect((await f.request('GET', '/v2/files/1')).value.key).toBe('a');
+    await expect(f.request('GET', '/v2/files/2')).rejects.toMatchObject({ status: 404 });
+    await expect(f.request('PUT', '/v2/files/1', { unlocked: 1 })).rejects.toMatchObject({ status: 404 });
+    await expect(f.request('POST', '/v2/files', { key: 'a' })).rejects.toMatchObject({ status: 404 });
     expect([...f.routes.keys()]).not.toContain('DELETE /v2/files/:id');
   });
 });
@@ -227,11 +228,11 @@ describe('v2 additional compatibility cases', () => {
     const unchanged = await f.request('POST', '/v2/server/applet', { token, id: 'union', status: '', data: '' }, { expand: 'applet' });
     expect(unchanged.value.data.applet).toMatchObject({ status: 'ready', data: 'payload', user_id: 1 });
   });
-  it('rejects file validation failures and missing queries while exposing scene and test endpoints', async () => {
+  it('rejects removed file writes while exposing owned reads and scene/test endpoints', async () => {
     const f = await fixture({ file: [{ id: 1, key: 'a', md5: 'same' }] });
-    for (const body of [{}, { key: 'b', size: 1.5 }, { key: 'b', user_id: 9 }, { key: 'b', md5: 'same' }]) await expect(f.request('POST', '/v2/files', body)).rejects.toMatchObject({ status: 422 });
+    for (const body of [{}, { key: 'b', size: 1.5 }, { key: 'b', user_id: 9 }, { key: 'b', md5: 'same' }]) await expect(f.request('POST', '/v2/files', body)).rejects.toMatchObject({ status: 404 });
     await expect(f.request('GET', '/v2/files/9')).rejects.toMatchObject({ status: 404 });
-    await expect(f.request('GET', '/v2/files/list')).rejects.toMatchObject({ status: 400 });
+    expect((await f.request('GET', '/v2/files/list')).value).toEqual([]);
     await expect(f.request('GET', '/v2/server/info')).rejects.toMatchObject({ status: 400 });
     expect((await f.request('GET', '/v2/server/scenes')).value).toEqual([{ verse_id: 42, name: 'Y1' }]);
     expect((await f.request('GET', '/v2/server/test')).value).toBe('2');
@@ -242,18 +243,16 @@ describe('v2 additional compatibility cases', () => {
 
 
 describe('v2 provider pagination and HTTP headers', () => {
-  it('paginates file list models without provider headers and honors sort', async () => {
-    const f = await fixture({ file: [{ id: 1, key: 'a', unionid: 'u' }, { id: 2, key: 'b', unionid: 'u' }, { id: 3, key: 'c', unionid: 'u' }] });
+  it('returns the complete owned file list newest first without provider headers', async () => {
+    const f = await fixture({ file: [{ id: 1, user_id: 1, key: 'a', unionid: 'u' }, { id: 2, user_id: 1, key: 'b', unionid: 'u' }, { id: 3, user_id: 1, key: 'c', unionid: 'u' }] });
     const r = await f.request('GET', '/v2/files/list', {}, { unionid: 'u', 'per-page': 1, page: 2, sort: '-id' });
-    expect(r.value.map((row: Row) => row.id)).toEqual([2]);
+    expect(r.value.map((row: Row) => row.id)).toEqual([3,2,1]);
     expect(r.headers['x-pagination-total-count']).toBeUndefined();
   });
-  it('sets absolute Yii Location headers for newly created REST models', async () => {
+  it('sets absolute Yii Location headers for newly created setups', async () => {
     const f = await fixture({ device: devices, control: controls });
     const setup = await f.request('POST', '/v2/setups', { device_id: 1 });
     expect(setup.headers.location).toBe('http://localhost/v2/setups/1');
-    const file = await f.request('POST', '/v2/files', { key: 'new' });
-    expect(file.headers.location).toBe('http://localhost/v2/files/1');
   });
   it('accepts a nonempty unknown expand list as a successful empty response', async () => {
     const f = await fixture();

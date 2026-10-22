@@ -1,6 +1,9 @@
 import { HttpException } from '@nestjs/common';
+import { basename } from 'node:path';
 import type { Context, Row, Services } from '../core/contracts';
 import type { ApiRouter } from '../core/router';
+import { ApiError } from '../core/errors';
+import { MiniProgramFileService } from '../v2/file-service';
 
 const success = (data: unknown, message = 'success') => ({ success: true, message, data });
 const userFields = (row: Row) => Object.fromEntries(['id', 'tel', 'nickname', 'avatar', 'role'].map(name => [name, row[name] ?? null]));
@@ -13,9 +16,18 @@ function numeric(value: unknown): boolean {
   return (typeof value === 'number' || typeof value === 'string' && value.trim() !== '' && /^[-+]?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?$/i.test(value.trim())) && Number.isFinite(Number(value));
 }
 function errorCode(error: unknown): number { return error instanceof HttpException ? error.getStatus() : Number((error as Row)?.status || 500); }
+function fileDescription(key: unknown): string {
+  let description = '';
+  for (const character of `AR打卡服务:${basename(String(key ?? ''))}`) {
+    if (Buffer.byteLength(description + character, 'utf8') > 120) break;
+    description += character;
+  }
+  return description;
+}
 
 export function registerIntegrations(router: ApiRouter, services: Services): void {
   const { db, auth, integrations: api } = services;
+  const files = new MiniProgramFileService(db);
   router.add('POST', '/v2/site/login', async ctx => {
     const identity = await api.codeSession(ctx.body.code);
     const unionid = nonempty(identity.unionid) ? identity.unionid : null;
@@ -69,28 +81,43 @@ export function registerIntegrations(router: ApiRouter, services: Services): voi
 
   for (const version of ['v1', 'v2']) {
     const prefix = `/${version}/wechat-pay`;
-    const authorize = async (ctx: Context) => { if (version === 'v2') await auth.bearer(ctx, 'v2-user'); };
+    const authorize = async (ctx: Context) => version === 'v2' ? auth.bearer(ctx, 'v2-user') : null;
     router.add('POST', `${prefix}/wxpay-order`, async ctx => {
-      await authorize(ctx);
+      const user = await authorize(ctx);
       const input = ctx.body;
-      if (!nonempty(input.openid)) return { code: 400, message: '缺少openid参数' };
-      if (!nonempty(input.out_trade_no)) return { code: 400, message: '缺少商户订单号参数' };
-      if (!numeric(input.amount) || Number(input.amount) <= 0 || !Number.isSafeInteger(Math.trunc(Number(input.amount)))) return { code: 400, message: '金额参数不正确' };
-      if (!/^[A-Za-z0-9_-]{6,32}$/.test(input.out_trade_no)) return { code: 400, message: '商户订单号格式不正确，要求6-32位字母数字或下划线' };
+      let order: Row;
+      if (version === 'v2') {
+        if (!nonempty(input.out_trade_no) || !/^[A-Za-z0-9_-]{6,32}$/.test(input.out_trade_no)) return bad('商户订单号格式不正确');
+        const file = await files.findOwned(input.file_id, user!);
+        order = { ...await files.reserveOrder(input.out_trade_no, file, user!, input.amount ?? null, input.openid ?? null), out_trade_no: input.out_trade_no, description: fileDescription(file.key) };
+      } else {
+        if (!nonempty(input.openid)) return { code: 400, message: '缺少openid参数' };
+        if (!nonempty(input.out_trade_no)) return { code: 400, message: '缺少商户订单号参数' };
+        if (!numeric(input.amount) || Number(input.amount) <= 0 || !Number.isSafeInteger(Math.trunc(Number(input.amount)))) return { code: 400, message: '金额参数不正确' };
+        if (!/^[A-Za-z0-9_-]{6,32}$/.test(input.out_trade_no)) return { code: 400, message: '商户订单号格式不正确，要求6-32位字母数字或下划线' };
+        order = { openid: input.openid, out_trade_no: input.out_trade_no, amount: Math.trunc(Number(input.amount)), description: input.description };
+      }
       try {
-        // Both Yii versions generated the v1 callback from the current request.
-        const notifyUrl = api.config.notifyUrl || `${issuer(ctx).replace(/\/$/, '')}/v1/wechat-pay/notify`;
-        return { code: 0, data: await api.order({ ...input, amount: Math.trunc(Number(input.amount)) }, notifyUrl) };
+        const notifyUrl = api.config.notifyUrl || `${issuer(ctx).replace(/\/$/, '')}${prefix}/notify`;
+        return { code: 0, data: await api.order(order, notifyUrl) };
       }
       catch { return { code: 500, message: '支付下单失败' }; }
     });
     router.add('GET', `${prefix}/wxpay-query-order-by-out-trade-no`, async ctx => {
-      await authorize(ctx);
+      const user = await authorize(ctx);
+      if (version === 'v2' && (!nonempty(ctx.query.out_trade_no) || !/^[A-Za-z0-9_-]{6,32}$/.test(ctx.query.out_trade_no))) return bad('订单编号无效');
       if (!nonempty(ctx.query.out_trade_no)) return { code: 400, message: '缺少商户订单号参数' };
+      if (version === 'v2') await files.assertOrderOwner(ctx.query.out_trade_no, user!);
+      let result: Row;
       try {
-        const result = await api.payment('GET', `/v3/pay/transactions/out-trade-no/${encodeURIComponent(ctx.query.out_trade_no)}?mchid=${encodeURIComponent(api.config.mchId || '')}`);
-        return { code: 0, message: '查询成功', data: { order_info: result, trade_state: result.trade_state ?? '', trade_state_desc: result.trade_state_desc ?? '' } };
+        result = await api.payment('GET', `/v3/pay/transactions/out-trade-no/${encodeURIComponent(ctx.query.out_trade_no)}?mchid=${encodeURIComponent(api.config.mchId || '')}`);
       } catch { return { code: 500, message: '查询订单失败' }; }
+      const data: Row = { order_info: result, trade_state: result.trade_state ?? '', trade_state_desc: result.trade_state_desc ?? '' };
+      if (version === 'v2') {
+        if (result.out_trade_no !== ctx.query.out_trade_no) return bad('查询订单编号不一致', 403);
+        data.unlocked = await files.confirmPayment(result, user!, api.config.appId || '', api.config.mchId || '');
+      }
+      return { code: 0, message: '查询成功', data };
     });
     router.add('GET', `${prefix}/wxpay-query-order-by-transaction-id`, async ctx => {
       await authorize(ctx);
@@ -131,8 +158,21 @@ export function registerIntegrations(router: ApiRouter, services: Services): voi
       const notice = await api.notification(raw ?? '', ctx.req.headers);
       if (typeof notice.id !== 'string' || !notice.id || typeof notice.event_type !== 'string'
         || (refund ? !notice.event_type.startsWith('REFUND.') : notice.event_type !== 'TRANSACTION.SUCCESS')) return bad('微信支付通知类型不匹配');
-      // The source application has no payment-order persistence or fulfilment model.
-      // Preserve its acknowledged-notification contract after authenticating/decrypting.
+      if (version === 'v2' && !refund && notice.resource?.trade_state === 'SUCCESS') {
+        try {
+          const orderNo = notice.resource.out_trade_no;
+          if (!nonempty(orderNo) || !/^[A-Za-z0-9_-]{6,32}$/.test(orderNo)) return bad('订单编号无效');
+          const user = await files.findOrderUser(orderNo);
+          // A signed notification triggers a fresh authenticated provider query;
+          // its callback payload alone never grants access to a file.
+          const order = await api.payment('GET', `/v3/pay/transactions/out-trade-no/${encodeURIComponent(orderNo)}?mchid=${encodeURIComponent(api.config.mchId || '')}`);
+          if (order.out_trade_no !== orderNo) return bad('查询订单编号不一致', 403);
+          await files.confirmPayment(order, user, api.config.appId || '', api.config.mchId || '');
+        } catch (error) {
+          ctx.res.status(500);
+          return { code: 'ERROR', message: error instanceof HttpException || error instanceof ApiError ? error.message : '支付通知处理异常' };
+        }
+      }
       if (api.config.onPaymentNotification) await api.config.onPaymentNotification(notice);
       return { code: 'SUCCESS', message: '成功' };
     };

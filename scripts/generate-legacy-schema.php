@@ -39,6 +39,7 @@ namespace yii\db {
         public function __construct(private string $type) {}
         public function notNull(): self { $this->suffix['null'] = 'NOT NULL'; return $this; }
         public function null(): self { $this->suffix['null'] = 'NULL'; return $this; }
+        public function comment(string $value): self { $this->suffix['comment'] = "COMMENT '" . str_replace("'", "''", $value) . "'"; return $this; }
         public function unique(): self { $this->suffix['unique'] = 'UNIQUE'; return $this; }
         public function defaultValue($value): self {
             $this->suffix['default'] = 'DEFAULT ' . (is_bool($value) ? (int)$value : (is_int($value) || is_float($value) ? $value : ($value === null ? 'NULL' : "'" . str_replace("'", "''", $value) . "'")));

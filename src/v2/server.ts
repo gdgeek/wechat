@@ -2,6 +2,7 @@ import type { Context, Row, Services } from '../core/contracts';
 import { ApiError } from '../core/errors';
 import { csv, hydrate, sqlNow } from './resources';
 import { recordRequest } from '../core/diagnostics';
+import { priceInCents } from './file-service';
 
 const pictureBase = 'https://game-1251022382.cos.ap-nanjing.myqcloud.com/picture/';
 export function defaultData(): Row {
@@ -96,8 +97,11 @@ async function getFile(s: Services, token: string, key: string | undefined, appl
   if (!recorded && applet) {
     let file = await s.db.one('SELECT * FROM file WHERE `key` = ?', [key]);
     if (!file) {
+      const report = await s.redis.find('report', token);
+      const setup = report && truthy(report.device_id) ? await s.db.one('SELECT * FROM setup WHERE device_id = ?', [report.device_id]) : null;
+      const price = priceInCents(setup ? setup.money : defaultData().money);
       const metadata = await s.integrations.fileMetadata(key);
-      file = await s.db.insert('file', { ...metadata, key, unionid: applet.id, user_id: applet.user_id });
+      file = await s.db.insert('file', { ...metadata, key, unionid: applet.id, user_id: applet.user_id, price });
     } else file = await s.db.update('file', file.id, { user_id: applet.user_id });
     recorded = { token, key, created_at: file.created_at, updated_at: String(Math.floor(Date.now() / 1000)), file_id: file.id };
   }

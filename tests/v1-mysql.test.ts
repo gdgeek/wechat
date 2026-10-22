@@ -25,7 +25,7 @@ describe.skipIf(!testUrl)('v1 real MySQL migration and financial parity', () => 
     }
     const services={db,auth:{bearer:async ()=> (await db.one('SELECT * FROM player WHERE id=1'))!}} as Services;
     router=new ApiRouter();registerV1(router,services);
-  });
+  }, 30000);
   afterAll(async () => {await pool?.end();});
   beforeEach(async () => {
     if (!db) return;
@@ -41,7 +41,7 @@ describe.skipIf(!testUrl)('v1 real MySQL migration and financial parity', () => 
     const found=router.match(method,path);expect(found).not.toBeNull();ctx.params=found!.params;return found!.route.handler(ctx) as Promise<any>;
   }
   test('imports all final tables indexes and foreign keys plus the explicit v1 compatibility column', async () => {
-    const tables=await db.query('SHOW TABLES');expect(tables).toHaveLength(17);
+    const tables=await db.query('SHOW TABLES');expect(tables).toHaveLength(18);
     expect((await db.columns('device')).find(c=>c.name==='shop_id')).toMatchObject({nullable:true});
     const version=(await db.columns('device')).find(c=>c.name==='version')!;
     expect(version.nullable).toBe(false);expect(Number(version.default)).toBe(0);

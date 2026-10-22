@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import { Database } from '../src/core/database';
 import { resolve } from 'node:path';
 import { preserveRecordHistory } from './record-preservation';
+import { ensureFileDownloadPrice } from './file-download-price';
 
 async function statements(path: string): Promise<string[]> {
   return (await readFile(resolve(process.cwd(), path), 'utf8')).replace(/^\s*--.*$/gm, '').split(';').map(sql => sql.trim()).filter(Boolean);
@@ -23,6 +24,7 @@ async function main(): Promise<void> {
     if (!columns.some(col => col.name === 'version')) await db.execute('ALTER TABLE device ADD COLUMN version int NOT NULL DEFAULT 0');
     if (!columns.some(col => col.name === 'shop_id')) for (const sql of await statements('database/002-v1-compatibility.sql')) await db.execute(sql);
     await preserveRecordHistory(db);
+    await ensureFileDownloadPrice(db);
     console.log('Backend schema is ready. Existing business rows were preserved.');
   } finally { await db.close(); }
 }

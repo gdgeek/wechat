@@ -42,4 +42,15 @@ The new source-freshness gate detected concurrent device-deletion work during ex
 - [x] Add an idempotent record preservation migration and real populated-schema coverage for existing arbitrary-name CASCADE foreign keys, without changing business rows.
 - [x] Recapture source evidence after this addition, then run all final checks and independent review.
 
-Final local evidence: MySQL 8.4 and MariaDB 11.4 each pass all 166 tests; build, Docker production build, true PHP/Node ES256 + Redis interoperability and 252-route/current-source checks pass. Production provider/hardware acceptance remains external.
+Final local evidence: MySQL 8.4 and MariaDB 11.4 each pass all 197 tests; build, Docker production build, true PHP/Node ES256 + Redis interoperability and 249-route/current-source checks pass. Production provider/hardware acceptance remains external.
+
+Final source gate caught the concurrent file-download contract before publication; this is the last included feature batch for this alignment snapshot.
+
+- [x] Align current file ownership reads, removed write actions, per-recording integer-cent prices, unknown historical prices and the new nullable-price migration.
+- [x] Align v2 file order preparation and authenticated payment confirmation/notification; preserve the v1 payment contract.
+- [x] Align recordingPriceInCents with the frozen source and document retained legacy recording-key owner behavior.
+- [x] Recapture this final source batch after all full SQL/HTTP tests, build, container and review checks pass. Publication and remote CI are recorded below.
+
+- [x] Complete the immutable local file_payment_order reservation contract included in the final frozen source, preserving case-sensitive order identity, idempotent retry, owner checks and pending-payment responses.
+
+Acceptance is pinned to source-manifest.json captured at 2026-10-22T17:52:58Z. Schema regeneration uses explicit YII2_MIGRATIONS pointing at that frozen directory; normal Node tests never silently read a changing parent checkout.

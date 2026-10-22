@@ -21,10 +21,10 @@
 | 项目 | method/path 对数 |
 | --- | ---: |
 | 原配置展开后的全部声明 | 488 |
-| 能解析到 action | 252 |
-| 其中业务、诊断及默认 REST action | 186 |
+| 能解析到 action | 249 |
+| 其中业务、诊断及默认 REST action | 183 |
 | 其中 OptionsAction 与方法兜底 | 66 |
-| 控制器存在但 action 不存在，原为 404 | 220 |
+| 控制器存在但 action 不存在，原为 404 | 223 |
 | 控制器不存在，原为 404 | 16 |
 
 缺控制器的 16 项来自配置中的 `v1/manager`，冻结源没有对应 `ManagerController.php`。缺 action 不能补成通用 CRUD，例如 `/v1/system/ready` 和大多数普通 `yii\rest\Controller` 自动展开的 CRUD 声明；这些原本会返回 404。
@@ -44,7 +44,7 @@
 | v1 REST 资源 | 59 | `v1-contracts.test.ts` |
 | v1 游戏及账务 | 24 | `v1-contracts.test.ts` |
 | v1 打卡及本地状态协调 | 13 | `v1-contracts.test.ts` |
-| v2 设备、配置、文件、状态协调 | 38 | `v2.test.ts` |
+| v2 设备、配置、文件、状态协调 | 35 | `v2.test.ts` |
 | 微信身份、资料、手机号 | 6 | `integrations.routes.test.ts`、`integrations.test.ts` |
 | 微信支付、查单、退款、通知 | 17 | `integrations.payments.test.ts`、`integrations.test.ts` |
 | 腾讯 STS / COS 配置与凭证 | 6 | `integrations.test.ts` |
@@ -75,7 +75,6 @@ Yii 的 OptionsAction 对 OPTIONS 返回 200，其他兜底方法返回 405，�
 | --- | --- | --- |
 | `GET /v1/q-cloud/object-url` | 调用不存在的 v1 `File::Create`，执行失败 | 真实 COS 签名，返回 `{url,method,expires}` |
 | `GET /v1/we-chat/info` | 返回 SDK application 对象，没有稳定的数据响应 | 仅公开 `app_id` / `mch_id` |
-| v2 支付及退款通知 | Controller 的用户 Bearer 过滤器阻挡正常微信回调 | 由微信支付签名、加密资源、商户身份校验认证 |
 | `GET /v1/helper/print`、`GET /v1/local/test` 的共享诊断记录 | 记录及回显请求结构时可能包含凭据 | 保持 payload 结构并使用共享 Redis；`Authorization` / `Cookie` / `Set-Cookie` 等敏感头以及具名顶层凭据字段脱敏 |
 
 已恢复的行为不列为差异：Swagger 的 Basic Auth；已有 applet 经公共 server 路径更新时原有的签名认证边界；文件删除 action 的原 404；REST 方法兜底。
@@ -100,7 +99,7 @@ node --require tsx/cjs scripts/check-parity.ts
 
 以下情况退出非零：源哈希不一致、清单证据或测试映射缺失、可解析源路由遗漏、未解释地将源 404 改为接口、存在未解释的额外注册，或五条未声明 HEAD 及两条未发布微信入口负例出现 handler / OptionsAction 兜底。缺失项必须修复或明确报告，不能删除清单项目凑齐。
 
-当前结构检查结果为 252 / 252：186 项业务及 REST action、66 项 OptionsAction / 方法兜底均有对应处理；全部 236 条源 404 声明保留。五条未声明 HEAD 及两条未发布微信入口负例保持 404。不存在遗漏或未解释的额外注册。
+当前结构检查结果为 249 / 249：183 项业务及 REST action、66 项 OptionsAction / 方法兜底均有对应处理；全部 239 条源 404 声明保留。五条未声明 HEAD 及两条未发布微信入口负例保持 404。不存在遗漏或未解释的额外注册。
 
 这不替代真实 MySQL / Redis、微信真机、商户支付配置、COS、Y1 和生产入口验收，也不证明每条响应内容已经与旧运行环境完全相同。
 
@@ -109,3 +108,9 @@ node --require tsx/cjs scripts/check-parity.ts
 管理认证已跟随当前 game 改为独立 ES256 Bearer JWT，共用 Yii 的 Redis key/记录与刷新 CAS，支持既有 PHP 令牌的单 audience 编码。密码变更、微信用户删除、设备 control 撤销实时生效；扫码 owner proof 与共享锁沿用现有客户端。
 
 当前基线还包含源工作区尚未提交的设备 version 上报逻辑：每次 UUID 上报校验并同步 version，省略为 0，范围 0..2147483647，更新不改变设备 updated_at。v1 数值校验和 version 排序、v2 嵌套 fields 通配符、旧支付 PEM/路径配置及手机号错误包装有专门回归用例。
+
+当前文件接口按当前用户归属读取，保留旧 NULL user_id + unionid 的归属回退；POST 集合与 PUT/PATCH/DELETE 单项按当前 Yii 返回 404。v2 文件下单仅从已归属文件的已知正数价格生成订单，微信查单与签名回调确认付款主体、商户、币种、金额和附件后解锁。源当前已移除回调 Bearer，Node 与其一致。
+
+当前源设备文件上报仍可能将既有 key 关联到当前 applet 用户；本次保留该原协议，不将文件读取权限校验描述成已完成全部上传归属安全改造。
+
+冻结源已新增 recordingPriceInCents 并用于新拍摄价格快照；Node 与此规则一致，接受有效整数分，不把小数或历史未知金额变成收费。新增本地 file_payment_order 使用大小写敏感订单号，持久保存账号/文件/金额绑定；查单和回调必须匹配此记录。

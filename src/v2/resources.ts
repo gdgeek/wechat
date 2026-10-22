@@ -6,7 +6,7 @@ type Resource = 'device' | 'setup' | 'file';
 const columns: Record<Resource, string[]> = {
   device: ['id', 'version', 'uuid', 'tag', 'created_at', 'updated_at', 'ip'],
   setup: ['id', 'money', 'slogans', 'pictures', 'thumbs', 'title', 'scene_id', 'device_id', 'shots', 'updated_at'],
-  file: ['id', 'unionid', 'key', 'type', 'md5', 'size', 'bucket', 'created_at', 'unlocked', 'title', 'user_id'],
+  file: ['id', 'unionid', 'key', 'type', 'md5', 'size', 'bucket', 'created_at', 'unlocked', 'title', 'user_id', 'price'],
 };
 const writable: Record<Resource, string[]> = {
   device: columns.device.filter(k => !['id', 'version'].includes(k)),
@@ -91,7 +91,9 @@ export async function paginate(s: Services, ctx: Context, resource: Resource, us
   const rawPage = Math.trunc(Number(ctx.query.page || 1));
   const page = Math.max(1, Math.min(Number.isFinite(rawPage) ? rawPage : 1, pageCount || 1));
   const sorts = csv(ctx.query.sort).map(value => ({ key: value.replace(/^-/, ''), direction: value.startsWith('-') ? 'DESC' : 'ASC' })).filter(({ key }) => columns[resource].includes(key)).slice(0, 1);
-  const order = sorts.length ? ` ORDER BY \`${sorts[0].key}\` ${sorts[0].direction}` : '';
+  const ordering: Record<string, string> = resource === 'file' ? { id: 'DESC' } : {};
+  for (const sort of sorts) ordering[sort.key] = sort.direction;
+  const order = Object.keys(ordering).length ? ' ORDER BY ' + Object.entries(ordering).map(([key,direction]) => `\`${key}\` ${direction}`).join(', ') : '';
   const rows = await s.db.query(`SELECT * FROM ${resource}${suffix}${order} LIMIT ${pageSize} OFFSET ${(page - 1) * pageSize}`, params);
   if (options.headers !== false) {
   for (const [name, value] of Object.entries({ 'X-Pagination-Total-Count': total, 'X-Pagination-Page-Count': pageCount, 'X-Pagination-Current-Page': page, 'X-Pagination-Per-Page': pageSize })) ctx.res.setHeader(name, value);
@@ -115,7 +117,7 @@ export async function validate(s: Services, resource: Resource, body: Row, curre
   const error = (field: string, message: string) => errors.push({ field, message });
   const strings = resource === 'device' ? ['uuid', 'tag', 'ip'] : resource === 'setup' ? ['title'] : ['unionid', 'key', 'type', 'md5', 'bucket', 'title'];
   for (const field of strings) if (data[field] !== undefined && data[field] !== null && (typeof data[field] !== 'string' || [...data[field]].length > 255)) error(field, `${field} must be a string with at most 255 characters.`);
-  const integers = resource === 'setup' ? ['scene_id', 'device_id'] : resource === 'file' ? ['size', 'unlocked', 'user_id'] : [];
+  const integers = resource === 'setup' ? ['scene_id', 'device_id'] : resource === 'file' ? ['size', 'unlocked', 'user_id', 'price'] : [];
   for (const field of integers) if (data[field] !== undefined && data[field] !== null && data[field] !== '') {
     if (!(typeof data[field] === 'number' && Number.isInteger(data[field])) && !(typeof data[field] === 'string' && /^[+-]?\d+$/.test(data[field]))) error(field, `${field} must be an integer.`);
   }

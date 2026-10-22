@@ -81,11 +81,12 @@ describe('integration route contracts', () => {
     await expect(call('POST', '/v2/wechat/bind-phone')).rejects.toMatchObject({ status: 400, message: 'code parameter is required' });
     expect(phone).not.toHaveBeenCalled();
   });
-  it('registers every legacy payment endpoint and preserves code-based validation', async () => {
+  it('registers every payment endpoint and preserves each version validation envelope', async () => {
     const { call, router } = setup();
     for (const version of ['v1', 'v2']) {
       for (const [method, action] of [['POST', 'wxpay-order'], ['GET', 'wxpay-query-order-by-out-trade-no'], ['GET', 'wxpay-query-order-by-transaction-id'], ['POST', 'wxpay-refund'], ['GET', 'wxpay-query-refund'], ['POST', 'notify'], ['GET', 'notify'], ['POST', 'refund-notify']]) expect(router.match(method, `/${version}/wechat-pay/${action}`)).not.toBeNull();
-      expect(await call('POST', `/${version}/wechat-pay/wxpay-order`)).toMatchObject({ code: 400, message: '缺少openid参数' });
+      if (version === 'v1') expect(await call('POST', `/${version}/wechat-pay/wxpay-order`)).toMatchObject({ code: 400, message: '缺少openid参数' });
+      else await expect(call('POST', `/${version}/wechat-pay/wxpay-order`)).rejects.toMatchObject({ status: 400, message: '商户订单号格式不正确' });
       expect(await call('POST', `/${version}/wechat-pay/wxpay-refund`, { out_trade_no: 'order1', out_refund_no: 'refund1', refund_amount: 200, total_amount: 100 })).toMatchObject({ code: 400, message: '退款金额不能大于订单总金额' });
       expect(await call('GET', `/${version}/wechat-pay/wxpay-query-order-by-transaction-id`, {}, { transaction_id: 'invalid' })).toMatchObject({ code: 400 });
     }
@@ -95,7 +96,7 @@ describe('integration route contracts', () => {
     vi.spyOn(integrations, 'notification').mockResolvedValue({ id: 'event', event_type: 'TRANSACTION.SUCCESS', resource: { mchid: 'merchant' } });
     expect(await call('POST', '/v2/wechat-pay/notify')).toEqual({ code: 'SUCCESS', message: '成功' });
     expect(auth.bearer).not.toHaveBeenCalled();
-    await call('GET', '/v2/wechat-pay/wxpay-query-order-by-out-trade-no');
+    await expect(call('GET', '/v2/wechat-pay/wxpay-query-order-by-out-trade-no')).rejects.toMatchObject({ status: 400 });
     expect(auth.bearer).toHaveBeenCalledWith(expect.anything(), 'v2-user');
   });
   it('preserves v1 openid unionid-null and exposes only public integration configuration', async () => {

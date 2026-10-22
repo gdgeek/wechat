@@ -36,7 +36,7 @@ npm run migrate -- --bootstrap
 
 `--bootstrap` 只接受空库，不包含 DROP TABLE。普通迁移创建兼容状态/扫码限流表和缺失扫码表，检查设备版本字段及 v1 商户关联列，并将 `record.device_id` 改为允许空值和 `ON DELETE SET NULL`；保留业务行。旧 Node Session 表保留，认证不再使用。迁移不会随应用启动自动运行。
 
-冻结源的 v2 历史迁移删除了 `device.shop_id`，但 v1 游戏仍依赖它。`database/002-v1-compatibility.sql` 恢复可空关联列和外键。已经丢失的设备与商户映射需要从可信备份核对恢复，代码不能推断历史归属。初始化 SQL 来自 64 个源迁移的最终状态；生成器只用于离线核对，服务运行不依赖 PHP。
+冻结源的 v2 历史迁移删除了 `device.shop_id`，但 v1 游戏仍依赖它。`database/002-v1-compatibility.sql` 恢复可空关联列和外键。已经丢失的设备与商户映射需要从可信备份核对恢复，代码不能推断历史归属。初始化 SQL 来自 65 个源迁移的最终状态；生成器只用于离线核对，服务运行不依赖 PHP。
 
 当前管理员设备删除入口为 `DELETE /admin-api/devices/:id`，仅密码管理员可用。存在未结束的游戏时返回 409；删除配置和关联时保留已结束游戏记录及原时间字段。必须先完成记录保留迁移，旧未升级的表结构会拒绝删除。已有外键通过单条 ALTER 原子更新；重复迁移不修改业务数据。
 
@@ -82,8 +82,12 @@ docker compose up -d
 
 `compose.yaml` 只启动后端，连接 `.env` 中指定的数据库和 Redis，不部署前端。证书、JWT 密钥通过只读挂载或平台 Secret 注入，容器以 `node` 用户运行，须保证该用户能读取密钥。`TRUST_PROXY` 仅在已有可信反向代理后启用，保证请求 origin 和 IP 限流使用正确地址。原管理端代理继续转发 Bearer 和 owner proof，保留目前清除 Cookie/CSRF 的设置。
 
-如果沿用 `SCENE_SERVER_BASE_URL=http://y1-p:8080` 或其他现有 Docker 服务名，使用 `BACKEND_NETWORK=proxy docker compose -f compose.yaml -f compose.proxy.yaml up -d` 接入对应的既有网络；该网络必须预先存在，名称可按部署修改。密钥挂载、域名入口与外部回调可达性在切换前验收。支付通知默认保留 Yii 由请求 origin 生成的 `/v1/wechat-pay/notify`，也支持显式通知 URL。
+如果沿用 `SCENE_SERVER_BASE_URL=http://y1-p:8080` 或其他现有 Docker 服务名，使用 `BACKEND_NETWORK=proxy docker compose -f compose.yaml -f compose.proxy.yaml up -d` 接入对应的既有网络；该网络必须预先存在，名称可按部署修改。密钥挂载、域名入口与外部回调可达性在切换前验收。支付通知默认保留 Yii 由请求 origin 生成的对应 `/v1/wechat-pay/notify` 或 `/v2/wechat-pay/notify`，也支持显式通知 URL。
 
 `/health` 同时检查数据库和 Redis，支持 HEAD。Swagger 的 `/swagger`、`/swagger/json-schema` 使用 `SWAGGER_USERNAME` / `SWAGGER_PASSWORD`，未配置不公开文档。微信支付通知采用原生平台验签与 AES-GCM 解密，通知入口不使用小程序 Bearer，也不虚构源系统没有的订单入账逻辑。
 
 源码基线与内容哈希保存在 [source-manifest.json](docs/source-manifest.json)。未包含原环境文件、密钥、业务数据或客户端源码。
+
+当前 v2 文件列表/详情只读当前账号文件；文件 CRUD 不再允许客户端直接写入价格或解锁状态。拍摄时保存整数分价格，旧文件未知价格保留 NULL；下单、查单和回调按当前 Yii 文件付款流程校验并解锁。整数分价格按冻结源 recordingPriceInCents 规则处理；本地订单绑定、回调核验和保留的协议限制见 API_PARITY.md。
+
+`file_payment_order` 使用区分大小写的订单号主键，支付请求前持久绑定账号、文件和金额；同绑定重试幂等，不允许把已有订单号换绑。普通升级即使已存在 file.price 也会创建缺失的订单表。

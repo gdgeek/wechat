@@ -26,10 +26,10 @@ Modern names take precedence over the existing Yii variable names:
 certificate serials to trusted PEM public keys/certificates. Configure both keys
 during rotation. Unknown serials are rejected; keys are never downloaded and
 trusted automatically. When a public key ID is configured it is also sent in the
-`Wechatpay-Serial` request header. `WECHAT_PAY_NOTIFY_URL` defaults to
-`PUBLIC_ORIGIN/v1/wechat-pay/notify`. Without either URL setting, both v1 and v2
-orders derive `/v1/wechat-pay/notify` from the incoming request origin, matching
-the original Yii controllers. `WECHAT_PAY_REFUND_NOTIFY_URL` is optional.
+`Wechatpay-Serial` request header. `WECHAT_PAY_NOTIFY_URL` overrides the callback
+URL. Otherwise v1 orders use `/v1/wechat-pay/notify` and v2 file orders use
+`/v2/wechat-pay/notify`, based on `PUBLIC_ORIGIN` or the incoming request origin.
+`WECHAT_PAY_REFUND_NOTIFY_URL` is optional.
 
 Signing credentials stay on the server. The client receives only mini program
 payment parameters, presigned object URLs, and scoped temporary STS credentials.
@@ -42,15 +42,31 @@ response details and signing material do not reach HTTP error messages.
 - v2 login uses only the `codeSession` identity. When unionid is absent, an
   existing verified openid is required; client-provided identity fields do not
   create or select a user.
-- v1/v2 payment operations retain `{code,message?,data?}`; login/profile/phone
-  retain `{success,message,data}`. v1 openid does not expose `session_key`.
+- Successful v1/v2 payment operations retain `{code,message?,data?}`;
+  login/profile/phone retain `{success,message,data}`. Current v2 file order and
+  confirmation validation uses HTTP errors. v1 openid does not expose `session_key`.
+- v2 orders require an owned `file_id`, use its stored price in fen and the
+  authenticated user's OpenID, and bind the file/account/amount in the provider
+  attachment. Unknown historical prices, free or unlocked files, substituted
+  payers and changed requested amounts are rejected before contacting WeChat.
+- Before contacting WeChat, the order number reserves an immutable
+  `file_payment_order` binding to the account, file and amount. Identical retries
+  reuse that binding; a conflicting reservation returns HTTP 409. Query routes
+  check the local owner before sending a provider request, and callbacks resolve
+  their user from the local reservation rather than an attachment.
+- A v2 order query confirms attachment ownership, AppID, merchant, payer,
+  currency and the stored price before returning `data.unlocked`. Only a
+  successful authenticated WeChat transaction writes `file.unlocked=1`. Known
+  unpaid states may omit attachment, amount and payer details and return false;
+  unknown states are rejected.
 - Notifications validate the exact raw request body, trusted serial, RSA
   signature, five minute signature window, authenticated AES-256-GCM payload,
-  merchant/AppID and event category before acknowledgment. The source application
-  has no payment-order fulfilment model. Like that source, the default handler
-  acknowledges a valid notification without inventing an order-state write.
-  An optional `onPaymentNotification` hook is available to an explicitly
-  configured fulfilment service; hook failure prevents acknowledgment.
+  merchant/AppID and event category before acknowledgment. A v2 paid callback
+  queries WeChat again and performs the same file payment checks before granting
+  access; callback fields alone cannot unlock a file. Failed confirmation returns
+  HTTP 500 without success acknowledgment. v1 callbacks and refund callbacks retain
+  their existing acknowledgment behavior. An optional `onPaymentNotification`
+  hook remains available; hook failure prevents acknowledgment.
 - The old v2 controller incorrectly required a user Bearer on WeChat callbacks.
   Callbacks now authenticate using the provider signature, while other v2
   payment operations continue to require `v2-user` Bearer credentials.
@@ -88,6 +104,8 @@ Tests use generated test RSA keys and injected provider responses, exercising
 exact request signing, response verification, authentic notification decryption,
 invalid signatures/serials/timestamps/ciphertext/merchant, login identity
 selection, refresh domain, profile field allowlists, phone credentials, STS
-policy scope, COS HEAD metadata and original payment/refund response shapes.
+policy scope, COS HEAD metadata, payment/refund response shapes, file price and
+ownership checks, signed provider requery, and idempotent file unlocking with
+isolated SQLite records.
 They do not contact real WeChat accounts, issue real temporary credentials,
 charge payments, or establish production callback reachability.

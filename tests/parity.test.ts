@@ -26,7 +26,7 @@ describe('source-derived HTTP route parity', () => {
   });
   it('retains independent source declarations, missing actions and Yii inherited REST rules', () => {
     const snapshot = loadSnapshot();
-    expect(snapshot.summary).toMatchObject({ declaredMethodPaths: 488, resolvable: 252, businessAndRest: 186, optionsFallbacks: 66, missingAction: 220, missingController: 16 });
+    expect(snapshot.summary).toMatchObject({ declaredMethodPaths: 488, resolvable: 249, businessAndRest: 183, optionsFallbacks: 66, missingAction: 223, missingController: 16 });
     expect(snapshot.routes.find(row => row.method === 'GET' && row.path === '/v1/manager/login')).toMatchObject({ sourceStatus: 'missing-controller' });
     expect(snapshot.routes.find(row => row.method === 'GET' && row.path === '/v1/system/ready')).toMatchObject({ sourceStatus: 'missing-action' });
     expect(snapshot.routes.find(row => row.method === 'GET' && row.path === '/v2/wechat/info')).toMatchObject({ sourceStatus: 'missing-action' });
@@ -43,8 +43,8 @@ describe('source-derived HTTP route parity', () => {
       expect(audit.missing, 'A missing source route must be implemented or reported; never remove it from the source snapshot.').toEqual([]);
       expect(audit.unexplainedExtras).toEqual([]);
       expect(audit.unexpected404Changes).toEqual([]);
-      expect(audit.covered).toHaveLength(252);
-      expect(audit.preserved404).toHaveLength(236);
+      expect(audit.covered).toHaveLength(249);
+      expect(audit.preserved404).toHaveLength(239);
       // Source UrlRule declares delete, but FileController removes the action.
       // Probe the registered preservation without issuing database/provider I/O.
       const preserved = createRouter(services).match('DELETE', '/v2/files/1');
