@@ -1,6 +1,37 @@
 # 2026-10-23 wechat2 部署与 b0 对照
 
-## 部署结果
+## 后端对齐发布（03:16，当前状态）
+
+已发布并部署后端提交 `9b212ce6a6d8fe993d2a85b8673b1468a5057248`。改动仅位于 `gdgeek/wechat` 后端仓库；原 Yii、Web 管理端、小程序、设备客户端及其入口未修改。兼容基线与保留的安全差异见 [HTTP 兼容记录](HTTP-COMPATIBILITY-2026-10-23.md)。
+
+| 节点 | Stack / 容器名 | 当前业务容器 | 验证状态 |
+| --- | --- | --- | --- |
+| [x2.b0.01xr.com](https://x2.b0.01xr.com/health) | `wechat2` / `wechat2`，Stack 21 | `02ad6f07f4898955d99c0f312ed28ffc89ecc71c23df25f5be02a96316d4672e` | healthy；DB/Redis up |
+| [x2.b1.01xr.com](https://x2.b1.01xr.com/health) | `wechat2` / `wechat2`，Stack 19 | `8e22a472ab65dbb5449216464a9628b63ab55381c09e052bf75eb7534df9b79b` | healthy；DB/Redis up |
+
+[最终 CI 39838170598](https://github.com/gdgeek/wechat/actions/runs/39838170598) 全部成功：MariaDB 10.4、MariaDB 11.4、MySQL 8.4 各 **736/736 项测试**、TypeScript 构建、**250/250 条路由**、生产 Docker 镜像构建和镜像内迁移验证通过，之后才发布镜像。首次对齐发布 [CI 39836690730](https://github.com/gdgeek/wechat/actions/runs/39836690730) 的 730 项测试也通过；随后在线上对照中发现 HTML 缓存头遗漏，新增六项回归并完成本轮修复与再次部署。
+
+镜像标识：
+
+- 镜像：`hkccr.ccs.tencentyun.com/gdgeek/wechat2:latest`，可固定回滚标签 `sha-9b212ce6a6d8fe993d2a85b8673b1468a5057248`。
+- 发布索引摘要：`sha256:cbb8afe625932b5adddd1f0ad633c1539889b988492b5117501fe185752dac2a`。
+- linux/amd64 清单：`sha256:670865ac990f81c054ec6270c4e3faf8746177ca4cc75d6aef3c84508345af6b`。
+- 两台容器实际 image ID 均为 `sha256:23607096a6d4678fc34dc6b93cfabb3d5d722b42af6ee71614c0d2a0a569d015`，与上述清单的 config digest 一致。
+- 公网 health 均返回完整提交 `9b212ce6a6d8fe993d2a85b8673b1468a5057248`、构建时间 `2026-10-23 03:14:57`，时间戳采用上海时区、秒精度。
+
+通过 Portainer 现有 Stack 的 Re-pull image and redeploy 更新，未改变网络或挂载。Compose 同时重建并运行了现有一次性辅助任务：b0 密钥准备、备份保护、迁移以及 b1 密钥准备均退出 0；这些任务仍使用原固定版本，备份的 `test -s` 保护继续保留既有备份。此轮没有新增数据库结构变更。
+
+### 最终公网对照与待完成项
+
+03:16:48–03:16:51 对 b0、b1 各执行 25 组旧 Yii / 新 Node 配对检查，共 100 个匿名只读请求。每台 **24/25 组一致**，合计 **48/50 组一致**。匹配项包括状态码、JSON 响应、XML 文本、HTML 错误标题、健康检查字段/时间格式，以及 Allow、WWW-Authenticate、Cache-Control、Expires、Pragma 和 CORS 白名单响应头。构建 SHA、构建时间与实时耗时按不同服务处理，不要求数值相同。
+
+此外，两个新入口的图片预览端点及编码路径各一次匿名鉴权检查通过，共四项；均在读取设备业务数据前返回预期 401。旧 Yii 两端仍为提交 `957f424788734dec0933370e45d6e11ec1395654`，健康正常。
+
+**尚未完成：Swagger 部署凭据迁移。** 两端旧 `/swagger/json-schema` 匿名请求为 401，新端因缺少 `SWAGGER_USERNAME` / `SWAGGER_PASSWORD` 配置返回 500“Swagger 配置未找到”。复用旧配置进行生产验证被自动审批拒绝，因为现有授权未明确涵盖这组文档登录凭据。已向用户请求授权：允许将同一组现有凭据用于旧接口验证、两端 wechat2 Stack 配置和新接口验证；授权仍待回复，未执行该操作。不能将 48/50 描述为全接口验收完成。
+
+真实收费、退款和物理设备操作没有在生产执行。验签、解密及支付状态写入由隔离自动化用例覆盖；安全脱敏、无效回调拒绝等保留差异详见兼容记录。
+
+## 首次部署结果（02:28，历史记录）
 
 仅部署 Node 后端；现有 Yii 服务、Web 管理端、小程序及设备入口继续保留。
 
@@ -9,7 +40,7 @@
 | b0 | https://x2.b0.01xr.com | `wechat2`，ID 21 | `wechat2`，healthy |
 | b1 | https://x2.b1.01xr.com | `wechat2`，ID 19 | `wechat2`，healthy |
 
-业务镜像为 `hkccr.ccs.tencentyun.com/gdgeek/wechat2:latest`，当前构建提交为 `ad2aef03f962b0285a225cdc45f1eb674fa2f0cd`，发布摘要为 `sha256:133b9d563f7df8596fdda84da4260461d4c25440dcb0880d3163240524320cdf`。对应完整提交标签为 `sha-ad2aef03f962b0285a225cdc45f1eb674fa2f0cd`。
+业务镜像为 `hkccr.ccs.tencentyun.com/gdgeek/wechat2:latest`，当时构建提交为 `ad2aef03f962b0285a225cdc45f1eb674fa2f0cd`，发布摘要为 `sha256:133b9d563f7df8596fdda84da4260461d4c25440dcb0880d3163240524320cdf`。对应完整提交标签为 `sha-ad2aef03f962b0285a225cdc45f1eb674fa2f0cd`。
 
 [CI 39829717046](https://github.com/gdgeek/wechat/actions/runs/39829717046) 的 MySQL 8.4、MariaDB 11.4、MariaDB 10.4 验证及镜像发布全部成功；MySQL 作业确认 17 个测试文件、200 项测试通过、249/249 路由覆盖，并实际运行生产镜像内的迁移命令。
 
@@ -46,6 +77,6 @@ b0 先以 `mariadb-dump --single-transaction` 完成共享数据库备份，再�
 
 时间格式的八小时时区差表示相同时间点；提交和构建时间分别代表两个仓库的镜像，不应要求 SHA 相同。单次响应耗时不作为性能结论。
 
-代码对照还发现一项待对齐行为：Yii 健康检查为 Redis PING 设置 3 秒连接及读取超时并校验响应；Node 默认业务 Redis 仅设置连接超时，已连接但 PING 不返回时缺少命令读取超时，health 也未单独校验 PONG。此次只读对比未改变该实现，也未在生产制造依赖故障。
+首次代码对照还发现一项当时待对齐、现已修复的行为：Yii 健康检查为 Redis PING 设置 3 秒连接及读取超时并校验响应；Node 默认业务 Redis 仅设置连接超时，已连接但 PING 不返回时缺少命令读取超时，health 也未单独校验 PONG。首次只读对比未改变该实现；下述问题已在本轮对齐发布中修复并经过隔离故障测试，未在生产制造依赖故障。
 
 健康检查仅覆盖业务数据库和 Redis，不能据此证明所有业务流程已完成生产验收。真实微信支付、退款及设备端流程仍需单独联调。

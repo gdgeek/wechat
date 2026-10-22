@@ -14,8 +14,10 @@
 - [x] Admin and providers: implement newly added image previews and device version fields; compare admin authentication/scan tickets and provider/payment adapters; test failures and successful behavior without live charges.
 - [x] Source-derived validation: regenerate the independent route snapshot and source manifest, retain invalid source routes, and extend tests to exercise actual HTTP requests against the reference where feasible.
 - [x] Run all unit/contract tests plus isolated database/Redis integration tests, production build and source-route freshness checks. Review the final diff and unresolved findings before publication.
-- [ ] Publish through the existing CI pipeline only after local checks pass; require every database matrix job and image publication to succeed before deployment.
-- [ ] Deploy the verified `wechat2` image to both existing Stacks; confirm running image commit/digest, container health and read-only response comparisons on both x2 domains against x domains.
-- [ ] Record exact test results, source baseline, CI run and deployment evidence. Distinguish tested compatibility from external real-transaction/device acceptance; never infer universal equivalence from route coverage alone.
+- [x] Publish through the existing CI pipeline only after local checks pass; require every database matrix job and image publication to succeed before deployment.
+- [x] Deploy the verified `wechat2` image to both existing Stacks; confirm running image commit/digest, container health and read-only response comparisons on both x2 domains against x domains.
+- [x] Record exact test results, source baseline, CI run and deployment evidence. Distinguish tested compatibility from external real-transaction/device acceptance; never infer universal equivalence from route coverage alone.
 
 Verification commands use Node 24: `npm run build`, `npm test`, `npm run parity -- --source-root /private/tmp/wechat-yii-align-20261023`, plus `RUN_INTEGRATION=1` against a dedicated localhost test database and Redis instance. The CI matrix covers MariaDB 10.4, MariaDB 11.4 and MySQL 8.4. Production writes, real payments/refunds and device commands are not test fixtures.
+
+- [ ] Complete Swagger credential migration and authenticated production verification after explicit credential-reuse authorization. Both new Stacks currently lack SWAGGER_USERNAME/PASSWORD; anonymous Swagger 500 versus Yii 401 remains documented. Automatic approval rejected reuse without this authorization; user choice is pending.
