@@ -8,6 +8,7 @@
 | 普通离线测试 | 174 通过，23 个 SQL/HTTP 集成用例按设计跳过 |
 | MySQL 8.4 + Redis 7.4 全量测试 | 17 个文件，197 项通过，0 跳过 |
 | MariaDB 11.4 + Redis 7.4 全量测试 | 17 个文件，197 项通过，0 跳过 |
+| GitHub CI 三数据库矩阵 | MySQL 8.4、MariaDB 11.4、MariaDB 10.4 均通过 |
 | 独立源路由核对 | 249/249 可解析 method/path 对覆盖；239/239 原 404 保留 |
 | 未声明方法/路径负例 | 7/7 保留 |
 | 当前源码新鲜度 | 对冻结源目录直接核对通过；`--source-root` 可检测其他 checkout 后续修改、删除和新增源文件 |
@@ -21,10 +22,12 @@
 
 可复现互通脚本为 `scripts/verify-yii-admin-interop.cjs` 和配套 PHP，使用当前源组件与真实隔离 Redis DB 15。测试密钥仅临时生成，不使用生产密钥或账号。扫码 create/approve 的限流计数仍由 Node SQL 保存，Yii 使用 FileCache，因此混合节点间此类计数不共享；管理令牌、刷新、密码限流和 owner 锁按 Yii Redis 格式共享。
 
-本轮 CI 还增加了与原 game CI 相同的 MariaDB 10.4 矩阵，远程结果待推送后记录。此前提交 `f1ccbe5` 的 [原始迁移 CI](https://github.com/gdgeek/wechat/actions/runs/39821551836) 仅为历史证据，不代替本轮验证。
+实现提交 `d5024cf` 的 [本轮 GitHub CI](https://github.com/gdgeek/wechat/actions/runs/39827497011) 三组均通过，含依赖安装、构建、空库初始化、全量测试、路由核对及 Docker 构建。新增 MariaDB 10.4 与原 game CI 数据库版本对齐；此前 `f1ccbe5` 的 CI 仅为历史记录。
 
 本次只修改 wechat 后端仓库，没有运行生产迁移或切换线上入口，没有修改 Vue 管理后台、小程序或源 Yii2 文件。微信支付及 COS/STS 测试使用真实本地密码算法和可注入传输，未发起真实交易。仍需使用真实凭据验收微信登录/手机号、支付退款回调、COS 权限、Y1 和真实设备。旧数据库已丢失的 device.shop_id 映射需从可信备份恢复，不能由代码推断。已知源损坏入口的兼容处理见 API_PARITY.md。
 
 文件新增验收包括当前账号与旧 unionid 归属回退、文件写入口 404、拍摄时价格快照、配置改价后旧文件不变、旧文件 NULL 不回填、v2 服务端定价与付款主体校验、微信签名查单与可信回调幂等解锁。金额明确按整数分处理，recordingPriceInCents 的整分规则与原有上传 key 归属重绑限制见 API_PARITY.md。
 
 本地订单表已覆盖真实 SQL 并发争用、不可换绑、同单幂等、大小写区分及 price 列已存在但订单表缺失时的升级。未付状态不依赖微信尚未返回的付款附件，成功支付仍核本地绑定与可信微信结果。
+
+实现已推送 gdgeek/wechat main，随后仅补验证文档。最终生产镜像包含 reserveOrder 方法、以 uid=1000 运行，健康接口 200；本次创建的所有测试容器与网络已清理，其他容器未动。

@@ -34,7 +34,7 @@ The user approved aligning the Node backend with the current game backend while 
 - [x] Reproduce and fix provider compatibility: legacy PEM/path private keys, request-derived v1/v2 payment callbacks when no override is set, and duplicate phone binding response. Keep the provider transport injected and avoid live payments.
 - [x] Refresh the independent source manifest/routes for the current admin refresh route. Add a source freshness check that compares an explicitly provided Yii checkout rather than only comparing stored manifests to each other.
 - [x] Update real HTTP integration tests for the unchanged JWT frontend, shared token state, scan owner proof, refresh/revoke and concurrency. Run build/unit/parity plus isolated SQL/Redis integration tests, and independently review all changes.
-- [ ] Update README, environment/deployment guidance and validation record; publish the verified backend commit to gdgeek/wechat and check CI. External live credentials/hardware acceptance remains separately documented.
+- [x] Update README, environment/deployment guidance and validation record; publish the verified backend commit to gdgeek/wechat and check CI. External live credentials/hardware acceptance remains separately documented.
 
 The new source-freshness gate detected concurrent device-deletion work during execution. Include its currently used DELETE endpoint and record-preservation semantics in this same backend-only alignment:
 
@@ -54,3 +54,5 @@ Final source gate caught the concurrent file-download contract before publicatio
 - [x] Complete the immutable local file_payment_order reservation contract included in the final frozen source, preserving case-sensitive order identity, idempotent retry, owner checks and pending-payment responses.
 
 Acceptance is pinned to source-manifest.json captured at 2026-10-22T17:52:58Z. Schema regeneration uses explicit YII2_MIGRATIONS pointing at that frozen directory; normal Node tests never silently read a changing parent checkout.
+
+Published code: d5024cf0b7706c5db67bc916e3b28ad722cd8776 on gdgeek/wechat main. GitHub Actions run 39827497011 completed successfully for MySQL 8.4, MariaDB 11.4 and MariaDB 10.4. Local full tests are 197/197 on both tested database families; temporary task containers and network removed.
