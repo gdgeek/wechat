@@ -1,6 +1,7 @@
 .git
 node_modules
 dist
+dist-tools
 coverage
 .env
 .env.*

@@ -14,6 +14,7 @@
     "test:watch": "vitest",
     "test:integration": "vitest run tests/integration",
     "migrate": "node --import tsx scripts/migrate.ts",
+    "migrate:prod": "cd dist-tools && node scripts/migrate.js",
     "parity": "node --import tsx scripts/check-parity.ts"
   },
   "dependencies": {

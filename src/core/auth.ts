@@ -1,4 +1,4 @@
-import { createHash, timingSafeEqual } from 'node:crypto';
+import { createHash, createSecretKey, timingSafeEqual, type KeyObject } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import jwt from 'jsonwebtoken';
 import type { Context, Row } from './contracts';
@@ -9,10 +9,11 @@ export type IdentityDomain = 'v1-player' | 'v2-user';
 export interface TokenPair { accessToken: string; expires: string; refreshToken: string; }
 export class AuthService {
   constructor(private readonly db: Database, private readonly options: { jwtKey?: string; now?: () => number; devAuth?: boolean } = {}) {}
-  private key(): string {
-    if (this.options.jwtKey) return this.options.jwtKey;
-    if (process.env.JWT_SECRET) return process.env.JWT_SECRET;
-    if (process.env.JWT_KEY) { try { return readFileSync(process.env.JWT_KEY, 'utf8'); } catch { throw new ApiError(503, 'Token signing is not configured'); } }
+  private key(): KeyObject {
+    if (this.options.jwtKey) return createSecretKey(Buffer.from(this.options.jwtKey));
+    if (process.env.JWT_SECRET) return createSecretKey(Buffer.from(process.env.JWT_SECRET));
+    // Yii HS256 uses the full file bytes as an HMAC secret, even for PEM files.
+    if (process.env.JWT_KEY) { try { return createSecretKey(readFileSync(process.env.JWT_KEY)); } catch { throw new ApiError(503, 'Token signing is not configured'); } }
     throw new ApiError(503, 'Token signing is not configured');
   }
   issue(user: Row, domain: IdentityDomain, issuer: string): TokenPair {
