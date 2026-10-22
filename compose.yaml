@@ -1,0 +1,10 @@
+services:
+  backend:
+    build: .
+    env_file: .env
+    ports:
+      - '127.0.0.1:8080:8080'
+    restart: unless-stopped
+    # Mount existing provider keys read-only, using paths from .env.
+    # volumes:
+    #   - ./certs:/run/secrets:ro

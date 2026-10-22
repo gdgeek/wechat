@@ -1,0 +1,57 @@
+name: Verify Node backend
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - database: mariadb:11.4
+            health: healthcheck.sh --connect --innodb_initialized
+          - database: mysql:8.4
+            health: mysqladmin ping -h 127.0.0.1 -pwechat-local-test --silent
+    services:
+      database:
+        image: ${{ matrix.database }}
+        env:
+          MARIADB_ROOT_PASSWORD: wechat-local-test
+          MARIADB_DATABASE: wechat_test
+          MYSQL_ROOT_PASSWORD: wechat-local-test
+          MYSQL_DATABASE: wechat_test
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="${{ matrix.health }}"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+      redis:
+        image: redis:7.4-alpine
+        ports: ['6379:6379']
+    env:
+      MYSQL_HOST: 127.0.0.1
+      MYSQL_PORT: 3306
+      MYSQL_USER: root
+      MYSQL_PASSWORD: wechat-local-test
+      MYSQL_DATABASE: wechat_test
+      REDIS_HOST: 127.0.0.1
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      RUN_INTEGRATION: '1'
+      V1_MYSQL_TEST_URL: mysql://root:wechat-local-test@127.0.0.1:3306/wechat_schema_test
+      NODE_ENV: test
+      JWT_SECRET: ci-test-key-only-not-for-deployment-32-bytes
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run build
+      - run: npm run migrate -- --bootstrap
+      - run: npm test
+      - run: npm run parity
+      - run: docker build -t wechat-backend:test .
