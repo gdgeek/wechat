@@ -1,13 +1,13 @@
 # 2026-10-23 wechat2 部署与 b0 对照
 
-## 后端对齐发布（03:16，当前状态）
+## 后端对齐发布与 Swagger 配置补齐（13:58，当前状态）
 
 已发布并部署后端提交 `9b212ce6a6d8fe993d2a85b8673b1468a5057248`。改动仅位于 `gdgeek/wechat` 后端仓库；原 Yii、Web 管理端、小程序、设备客户端及其入口未修改。兼容基线与保留的安全差异见 [HTTP 兼容记录](HTTP-COMPATIBILITY-2026-10-23.md)。
 
 | 节点 | Stack / 容器名 | 当前业务容器 | 验证状态 |
 | --- | --- | --- | --- |
-| [x2.b0.01xr.com](https://x2.b0.01xr.com/health) | `wechat2` / `wechat2`，Stack 21 | `02ad6f07f4898955d99c0f312ed28ffc89ecc71c23df25f5be02a96316d4672e` | healthy；DB/Redis up |
-| [x2.b1.01xr.com](https://x2.b1.01xr.com/health) | `wechat2` / `wechat2`，Stack 19 | `8e22a472ab65dbb5449216464a9628b63ab55381c09e052bf75eb7534df9b79b` | healthy；DB/Redis up |
+| [x2.b0.01xr.com](https://x2.b0.01xr.com/health) | `wechat2` / `wechat2`，Stack 21 | `9988abcb59f8e0ef9ab0a8e5aef21c297b6afdfd3750bbcf2d82aaa8ffdf6c2f` | healthy；DB/Redis up |
+| [x2.b1.01xr.com](https://x2.b1.01xr.com/health) | `wechat2` / `wechat2`，Stack 19 | `539fbd3f7cbf2e3900e804150f170d2f70daafd03a2dfae8fc2553394b6e6728` | healthy；DB/Redis up |
 
 [最终 CI 39838170598](https://github.com/gdgeek/wechat/actions/runs/39838170598) 全部成功：MariaDB 10.4、MariaDB 11.4、MySQL 8.4 各 **736/736 项测试**、TypeScript 构建、**250/250 条路由**、生产 Docker 镜像构建和镜像内迁移验证通过，之后才发布镜像。首次对齐发布 [CI 39836690730](https://github.com/gdgeek/wechat/actions/runs/39836690730) 的 730 项测试也通过；随后在线上对照中发现 HTML 缓存头遗漏，新增六项回归并完成本轮修复与再次部署。
 
@@ -19,15 +19,19 @@
 - 两台容器实际 image ID 均为 `sha256:23607096a6d4678fc34dc6b93cfabb3d5d722b42af6ee71614c0d2a0a569d015`，与上述清单的 config digest 一致。
 - 公网 health 均返回完整提交 `9b212ce6a6d8fe993d2a85b8673b1468a5057248`、构建时间 `2026-10-23 03:14:57`，时间戳采用上海时区、秒精度。
 
-通过 Portainer 现有 Stack 的 Re-pull image and redeploy 更新，未改变网络或挂载。Compose 同时重建并运行了现有一次性辅助任务：b0 密钥准备、备份保护、迁移以及 b1 密钥准备均退出 0；这些任务仍使用原固定版本，备份的 `test -s` 保护继续保留既有备份。此轮没有新增数据库结构变更。
+03:16 通过 Portainer 现有 Stack 的 Re-pull image and redeploy 更新，未改变网络或挂载。Compose 同时重建并运行了现有一次性辅助任务：b0 密钥准备、备份保护、迁移以及 b1 密钥准备均退出 0；这些任务仍使用原固定版本，备份的 `test -s` 保护继续保留既有备份。此轮没有新增数据库结构变更。
 
-### 最终公网对照与待完成项
+### 最终公网对照与 Swagger 验收
 
-03:16:48–03:16:51 对 b0、b1 各执行 25 组旧 Yii / 新 Node 配对检查，共 100 个匿名只读请求。每台 **24/25 组一致**，合计 **48/50 组一致**。匹配项包括状态码、JSON 响应、XML 文本、HTML 错误标题、健康检查字段/时间格式，以及 Allow、WWW-Authenticate、Cache-Control、Expires、Pragma 和 CORS 白名单响应头。构建 SHA、构建时间与实时耗时按不同服务处理，不要求数值相同。
+13:58:09–13:58:13 对 b0、b1 各执行 25 组旧 Yii / 新 Node 配对检查，共 100 个匿名只读请求。每台 **25/25 组一致**，合计 **50/50 组一致**。匹配项包括状态码、JSON 响应、XML 文本、HTML 错误标题、健康检查字段/时间格式，以及 Allow、WWW-Authenticate、Cache-Control、Expires、Pragma 和 CORS 白名单响应头。构建 SHA、构建时间与实时耗时按不同服务处理，不要求数值相同。
 
-此外，两个新入口的图片预览端点及编码路径各一次匿名鉴权检查通过，共四项；均在读取设备业务数据前返回预期 401。旧 Yii 两端仍为提交 `957f424788734dec0933370e45d6e11ec1395654`，健康正常。
+前轮还对两个新入口的图片预览端点及编码路径各执行一次匿名鉴权检查，共四项通过；均在读取设备业务数据前返回预期 401。本轮旧 Yii 两端返回提交 `3b63907ed4bf41b074cd1a4064f68ec796bdd10d`，新端仍为已通过 CI 的 `9b212ce6a6d8fe993d2a85b8673b1468a5057248`，四个入口均健康。
 
-**尚未完成：Swagger 部署凭据迁移。** 两端旧 `/swagger/json-schema` 匿名请求为 401，新端因缺少 `SWAGGER_USERNAME` / `SWAGGER_PASSWORD` 配置返回 500“Swagger 配置未找到”。复用旧配置进行生产验证被自动审批拒绝，因为现有授权未明确涵盖这组文档登录凭据。已向用户请求授权：允许将同一组现有凭据用于旧接口验证、两端 wechat2 Stack 配置和新接口验证；授权仍待回复，未执行该操作。不能将 48/50 描述为全接口验收完成。
+**Swagger 部署凭据迁移已完成。** 用户明确授权复用现有 Swagger 凭据后，先验证旧 Yii 两端认证 schema 均为 200，再仅向 b0、b1 的 `wechat2` 服务环境加入 `SWAGGER_USERNAME` 和 `SWAGGER_PASSWORD`。编辑器回读确认除这两项外配置结构完全一致。13:56、13:57 分别更新两端 Stack，沿用现有已验证镜像，未重新构建业务代码；辅助任务容器 ID 保持不变，均正常退出 0。凭据仅保存于现有 Portainer Stack 配置，未写入仓库、验证结果或聊天。
+
+13:58 的独立 Swagger 验证 **40/40 项通过**：四个入口分别检查页面及 schema 的匿名请求、错误凭据、已授权正确凭据，以及 CSS/JS 的 GET 和 HEAD。匿名及错误凭据均为 401，realm 与错误正文一致；正确凭据返回 200，HTML 包含本地资源和 schema 引用，JSON 可解析且包含有效 OpenAPI、info、paths；静态资源返回 200，类型和响应体符合预期。旧 Yii 和 Node 的文档标题、版本号和完整 schema 按各自实现生成，不要求整份文档字节相同。
+
+前轮因缺少 Swagger 配置产生的两项失败已消除，配对检查由 48/50 提升为 50/50。这证明上述检查范围内通过，不能据此推断所有真实业务场景均已在线上实测。
 
 真实收费、退款和物理设备操作没有在生产执行。验签、解密及支付状态写入由隔离自动化用例覆盖；安全脱敏、无效回调拒绝等保留差异详见兼容记录。
 

@@ -20,4 +20,4 @@
 
 Verification commands use Node 24: `npm run build`, `npm test`, `npm run parity -- --source-root /private/tmp/wechat-yii-align-20261023`, plus `RUN_INTEGRATION=1` against a dedicated localhost test database and Redis instance. The CI matrix covers MariaDB 10.4, MariaDB 11.4 and MySQL 8.4. Production writes, real payments/refunds and device commands are not test fixtures.
 
-- [ ] Complete Swagger credential migration and authenticated production verification after explicit credential-reuse authorization. Both new Stacks currently lack SWAGGER_USERNAME/PASSWORD; anonymous Swagger 500 versus Yii 401 remains documented. Automatic approval rejected reuse without this authorization; user choice is pending.
+- [x] Complete Swagger credential migration and authenticated production verification after explicit credential-reuse authorization. User authorized reuse; both Stacks now contain SWAGGER_USERNAME/PASSWORD. Anonymous and invalid credentials return 401, authorized page/schema return 200, and static resource GET/HEAD checks pass. Final evidence: 50/50 production pairs and 40/40 Swagger checks, with both containers healthy on the tested 9b212ce image.
