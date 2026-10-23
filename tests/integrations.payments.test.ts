@@ -1,5 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createCipheriv, generateKeyPairSync, sign, verify } from 'node:crypto';
+import { once } from 'node:events';
+import { createServer } from 'node:http';
+import type { AddressInfo } from 'node:net';
 import { DatabaseSync } from 'node:sqlite';
 import { xmlResponse } from '../src/core/serialization';
 import { ApiRouter } from '../src/core/router';
@@ -68,6 +71,39 @@ function notice(refund = false, merchant = 'merchant') {
 }
 
 describe('payment endpoints with cryptographic provider transport', () => {
+  it('uses a supported language with real Node fetch', async () => {
+    const languages: Array<string | undefined> = [];
+    const server = createServer(async (request, response) => {
+      const language = request.headers['accept-language'];
+      languages.push(language);
+      const accepted = language === 'zh-CN';
+      const signed = signedResponse(accepted ? { data: [] } : {
+        code: 'PARAM_ERROR', message: '传入了不支持的Accept-Language',
+      }, accepted ? 200 : 406);
+      response.writeHead(signed.status, Object.fromEntries(signed.headers));
+      response.end(await signed.text());
+    });
+    server.listen(0, '127.0.0.1');
+    await once(server, 'listening');
+    const origin = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+    try {
+      // Keep the real Fetch defaults and wire serialization in this regression.
+      const rejected = await fetch(`${origin}/v3/certificates`);
+      expect(rejected.status).toBe(406);
+      expect(await rejected.json()).toMatchObject({ code: 'PARAM_ERROR' });
+      expect(languages).toEqual(['*']);
+
+      const api = new Integrations({ ...config, fetch: (input, init) => {
+        const url = new URL(String(input));
+        return fetch(`${origin}${url.pathname}${url.search}`, init);
+      } });
+      await expect(api.payment('GET', '/v3/certificates')).resolves.toEqual({ data: [] });
+      expect(languages).toEqual(['*', 'zh-CN']);
+    } finally {
+      await new Promise<void>((resolve, reject) => server.close(error => error ? reject(error) : resolve()));
+    }
+  });
+
   it('derives the original callback from the request when no new URL configuration is supplied', async () => {
     try {
       vi.stubEnv('PUBLIC_ORIGIN', undefined);
