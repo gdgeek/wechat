@@ -7,7 +7,7 @@ export interface AdminIdentity { source: 'password' | 'wechat'; username: string
 export interface AdminRecord { identity: AdminIdentity; issuer: string; expiresAt: number; refreshHash: string; }
 export interface AuthRedis { command(args: string[]): Promise<any>; }
 export const authUnavailable = () => new ApiError(503, '管理认证服务暂时不可用，请稍后重试', undefined, 'HttpException');
-export const adminIssuer = () => process.env.ADMIN_AUTH_ISSUER || process.env.ADMIN_SCAN_LOGIN_ORIGIN || 'https://checkin.voxel.cn';
+export const adminIssuer = () => process.env.ADMIN_AUTH_ISSUER || process.env.ADMIN_SCAN_LOGIN_ORIGIN || 'https://c.4mr.cn';
 
 /** Uses the exact Yii AdminTokenStore keys, records and atomic Lua operations. */
 export class AdminTokenStore {
