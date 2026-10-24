@@ -5,7 +5,7 @@ import { defaultData } from '../v2/server';
 function content(values: unknown): string[] { return Array.isArray(values) ? values.filter((value): value is string => typeof value === 'string' && value.trim() !== '').map(value => value.trim()) : []; }
 export function normalizeDevice(device: Row, setup: Row | null): Row {
   const title = String(setup?.title ?? '');
-  return { id: Number(device.id), version: Number(device.version ?? 0), uuid: String(device.uuid ?? ''), name: title.trim() && title.trim() !== '未知' ? title.trim() : String(device.tag || device.uuid || `设备 ${device.id}`), title, ip: String(device.ip ?? ''), status: 'unknown', updatedAt: String(setup?.updated_at || device.updated_at || ''), gameId: setup?.scene_id == null ? null : Number(setup.scene_id), slogans: content(setup?.slogans), pictures: content(setup?.pictures), thumbs: content(setup?.thumbs) };
+  return { id: Number(device.id), version: Number(device.version ?? 0), uuid: String(device.uuid ?? ''), name: title.trim() && title.trim() !== '未知' ? title.trim() : String(device.tag || device.uuid || `设备 ${device.id}`), title, ip: String(device.ip ?? ''), status: 'unknown', createdAt: String(device.created_at ?? ''), updatedAt: String(setup?.updated_at || device.updated_at || ''), gameId: setup?.scene_id == null ? null : Number(setup.scene_id), slogans: content(setup?.slogans), pictures: content(setup?.pictures), thumbs: content(setup?.thumbs) };
 }
 export function validateConfiguration(input: unknown): Row {
   if (!input || typeof input !== 'object' || Array.isArray(input)) throw new ApiError(422, '设备配置必须为 JSON 对象');

@@ -1,5 +1,7 @@
 # Yii HTTP compatibility verification — 2026-10-23
 
+Historical release record. The current committed-source comparison and callback contracts are recorded in [the 2026-10-24 refresh](HTTP-COMPATIBILITY-2026-10-24.md).
+
 This backend-only update compares against game HEAD `412ce84b7a6c3f33d0917e5be35435f04db842e1` and its local backend edits frozen at **02:42:40 Asia/Shanghai**. File hashes are in `source-manifest.json`; this is a defined acceptance baseline, not a claim that future changes in another repository are automatically mirrored.
 
 ## Aligned contracts

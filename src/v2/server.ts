@@ -14,7 +14,7 @@ export async function defaultInfo(s: Services): Promise<Row> {
 }
 function setupInfo(row: Row): Row { const value = hydrate(row); return Object.fromEntries(['title', 'pictures', 'scene_id', 'updated_at'].map(key => [key, value[key] ?? null])); }
 function setupData(row: Row): Row { const value = hydrate(row); return Object.fromEntries(['money', 'slogans', 'thumbs', 'shots'].map(key => [key, value[key] ?? null])); }
-export async function getInfo(s: Services, uuid: unknown): Promise<Row> {
+export async function getInfo(s: Services, uuid: unknown, version: number | null = null): Promise<Row> {
   if (uuid !== null && uuid !== undefined && typeof uuid !== 'string') throw new ApiError(400, 'uuid must be a string');
   if (truthy(uuid)) {
     let device = await s.db.one('SELECT * FROM device WHERE uuid = ?', [uuid]);
@@ -36,6 +36,9 @@ export async function getInfo(s: Services, uuid: unknown): Promise<Row> {
         if (!device) throw error;
       }
     }
+    if (version !== null && Number(device.version) !== version) {
+      await s.db.execute('UPDATE device SET version = ? WHERE id = ?', [version, device.id]);
+    }
     const setup = await s.db.one('SELECT * FROM setup WHERE device_id = ?', [device.id]);
     if (setup) return setupInfo(setup);
   }
@@ -56,7 +59,7 @@ function requiredScalar(value: any, name: string): string {
   if (typeof value !== 'string' && typeof value !== 'number') throw new ApiError(400, `${name} must be a string`);
   return String(value);
 }
-function reportedVersion(body: Row): number {
+export function reportedVersion(body: Row): number {
   const value = Object.hasOwn(body, 'version') ? body.version : 0;
   const match = typeof value === 'string' ? /^[\t\n\v\r ]*([+-]?(?:0|[1-9][0-9]*))[\t\n\v\r ]*$/.exec(value) : null;
   const version = typeof value === 'number' ? value : match ? Number(match[1]) : NaN;

@@ -1,6 +1,6 @@
 import { HttpException } from '@nestjs/common';
-import { createDecipheriv, createHash, createHmac, randomBytes, sign, verify, X509Certificate } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { createDecipheriv, createHash, createHmac, createPublicKey, randomBytes, sign, verify, X509Certificate } from 'node:crypto';
+import { readFileSync, statSync } from 'node:fs';
 import type { Row } from '../core/contracts';
 
 /** Actual provider transports. No endpoint forwards to the retired PHP service. */
@@ -18,18 +18,53 @@ function pem(value: string | undefined, path: string | undefined): string | unde
   // EasyWeChat accepts either a PEM value or a file path in the legacy variables.
   return path.trimStart().startsWith('-----BEGIN ') ? path.replace(/\\n/g, '\n') : readFileSync(path, 'utf8');
 }
-function environment(): IntegrationOptions {
+interface EnvironmentOptions extends IntegrationOptions { paymentConfigurationError?: string }
+function environment(): EnvironmentOptions {
   const env = process.env;
   const keys: Record<string, string> = env.WECHAT_PAY_PLATFORM_KEYS_JSON ? JSON.parse(env.WECHAT_PAY_PLATFORM_KEYS_JSON) : {};
-  const key = pem(env.WECHAT_PAY_PLATFORM_PUBLIC_KEY, env.WECHAT_PAY_PLATFORM_PUBLIC_KEY_PATH || env.WECHAT_PUB_KEY);
   const publicKeyId = env.WECHAT_PAY_PLATFORM_SERIAL_NO || env.WECHAT_PUB_KEY_ID;
-  if (key && publicKeyId && (!keys[publicKeyId] || env.WECHAT_PAY_PLATFORM_PUBLIC_KEY || env.WECHAT_PAY_PLATFORM_PUBLIC_KEY_PATH)) keys[publicKeyId] = key;
+  let paymentConfigurationError: string | undefined;
+  try {
+    const modernKey = env.WECHAT_PAY_PLATFORM_PUBLIC_KEY || env.WECHAT_PAY_PLATFORM_PUBLIC_KEY_PATH;
+    const modernConfigured = !!modernKey || Object.keys(keys).length > 0;
+    if (modernKey) {
+      const key = pem(env.WECHAT_PAY_PLATFORM_PUBLIC_KEY, env.WECHAT_PAY_PLATFORM_PUBLIC_KEY_PATH);
+      if (!key || !publicKeyId) throw Error();
+      createPublicKey(key);
+      keys[publicKeyId] = key;
+    } else if (publicKeyId && !keys[publicKeyId] && env.WECHAT_PUB_KEY) {
+      const key = pem(undefined, env.WECHAT_PUB_KEY)!;
+      createPublicKey(key);
+      keys[publicKeyId] = key;
+    } else if (!modernConfigured && (env.WECHAT_PUB_KEY_ID || env.WECHAT_PUB_KEY || env.WECHAT_PLATFORM_CERTS)) {
+      throw Error();
+    }
+    // Parse every configured legacy certificate, even if a modern map overrides
+    // its serial. A damaged rotation entry must never be silently discarded.
+    const paths: unknown = env.WECHAT_PLATFORM_CERTS ? JSON.parse(env.WECHAT_PLATFORM_CERTS) : [];
+    if (!Array.isArray(paths)) throw Error();
+    const references = new Map<string, string>();
+    if (env.WECHAT_PUB_KEY_ID && env.WECHAT_PUB_KEY) references.set(env.WECHAT_PUB_KEY_ID, env.WECHAT_PUB_KEY);
+    for (const path of paths) {
+      if (typeof path !== 'string' || !path || !statSync(path).isFile()) throw Error();
+      const contents = readFileSync(path, 'utf8');
+      const serial = new X509Certificate(contents).serialNumber.toUpperCase();
+      if (!serial || (references.has(serial) && references.get(serial) !== path)) throw Error();
+      references.set(serial, path);
+      if (!keys[serial]) keys[serial] = contents;
+    }
+  } catch {
+    // Yii creates its payment application lazily. Invalid payment verification
+    // configuration must not disable unrelated login or COS operations.
+    paymentConfigurationError = '微信支付验证配置无效';
+  }
   const serialNo = env.WECHAT_PAY_SERIAL_NO || (env.WECHAT_CERTIFICATE ? new X509Certificate(pem(undefined, env.WECHAT_CERTIFICATE)!).serialNumber : undefined);
   return {
     appId: env.WECHAT_APP_ID, appSecret: env.WECHAT_APP_SECRET || env.WECHAT_SECRET,
     mchId: env.WECHAT_PAY_MCH_ID || env.WECHAT_MCH_ID, serialNo,
     privateKey: pem(env.WECHAT_PAY_PRIVATE_KEY, env.WECHAT_PAY_PRIVATE_KEY_PATH || env.WECHAT_PRIVATE_KEY),
     apiV3Key: env.WECHAT_PAY_API_V3_KEY || env.WECHAT_SECRET_KEY, platformKeys: keys, platformKeyId: publicKeyId,
+    paymentConfigurationError,
     notifyUrl: env.WECHAT_PAY_NOTIFY_URL,
     refundNotifyUrl: env.WECHAT_PAY_REFUND_NOTIFY_URL,
     secretId: env.TENCENT_SECRET_ID || env.SECRET_ID, secretKey: env.TENCENT_SECRET_KEY || env.SECRET_KEY,
@@ -48,11 +83,14 @@ export class Integrations {
   private readonly fetcher: typeof fetch;
   readonly now: () => number;
   private readonly nonce: () => string;
+  private readonly paymentConfigurationError?: string;
   private accessToken?: { value: string; expires: number };
   private accessTokenRequest?: Promise<string>;
 
   constructor(options: IntegrationOptions = {}) {
-    this.config = { ...environment(), ...options };
+    const { paymentConfigurationError, ...config } = environment();
+    this.config = { ...config, ...options };
+    this.paymentConfigurationError = paymentConfigurationError;
     this.fetcher = options.fetch || globalThis.fetch;
     this.now = options.now || (() => Math.floor(Date.now() / 1000));
     this.nonce = options.nonce || (() => randomBytes(16).toString('hex'));
@@ -60,6 +98,10 @@ export class Integrations {
 
   private required(...names: (keyof IntegrationOptions)[]): void {
     if (names.some(name => !this.config[name])) failure(503, '外部服务配置不完整');
+  }
+  private requirePaymentVerification(): void {
+    if (this.paymentConfigurationError) failure(503, this.paymentConfigurationError);
+    if (!Object.keys(this.config.platformKeys || {}).length) failure(503, '微信支付验证配置不完整');
   }
   private async transport(url: string, init: RequestInit = {}): Promise<Response> {
     try { return await this.fetcher(url, { ...init, signal: AbortSignal.timeout(15_000), redirect: 'error' }); }
@@ -123,6 +165,7 @@ export class Integrations {
   }
 
   async payment(method: string, path: string, data?: Row): Promise<Row> {
+    this.requirePaymentVerification();
     this.required('mchId', 'serialNo', 'privateKey');
     if (!path.startsWith('/v3/')) return failure(400, '支付请求路径无效');
     const body = data === undefined ? '' : JSON.stringify(data);
@@ -131,7 +174,7 @@ export class Integrations {
     const signature = sign('RSA-SHA256', Buffer.from(`${method}\n${path}\n${timestamp}\n${nonce}\n${body}\n`), this.config.privateKey!).toString('base64');
     const authorization = `WECHATPAY2-SHA256-RSA2048 mchid="${this.config.mchId}",nonce_str="${nonce}",timestamp="${timestamp}",serial_no="${this.config.serialNo}",signature="${signature}"`;
     const platformKeyId = this.config.platformKeyId || Object.keys(this.config.platformKeys || {}).find(id => id.startsWith('PUB_KEY_ID_'));
-    const response = await this.transport(`https://api.mch.weixin.qq.com${path}`, { method, headers: { Accept: 'application/json', 'Content-Type': 'application/json', Authorization: authorization, ...(platformKeyId ? { 'Wechatpay-Serial': platformKeyId } : {}) }, ...(body ? { body } : {}) });
+    const response = await this.transport(`https://api.mch.weixin.qq.com${path}`, { method, headers: { Accept: 'application/json', 'Accept-Language': 'zh-CN', 'Content-Type': 'application/json', Authorization: authorization, ...(platformKeyId ? { 'Wechatpay-Serial': platformKeyId } : {}) }, ...(body ? { body } : {}) });
     const raw = await response.text();
     this.verifyPayment(raw, response.headers);
     let result: unknown;
@@ -158,6 +201,7 @@ export class Integrations {
   }
 
   async notification(raw: string | Buffer, headers: Headers | Record<string, unknown>): Promise<Row> {
+    this.requirePaymentVerification();
     this.required('apiV3Key', 'mchId');
     const text = raw.toString();
     this.verifyPayment(text, headers);
