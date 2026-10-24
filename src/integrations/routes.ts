@@ -187,7 +187,6 @@ export function registerIntegrations(router: ApiRouter, services: Services): voi
         }
       }
       if (api.config.onPaymentNotification) await api.config.onPaymentNotification(notice);
-      if (version === 'v1' || refund) return yiiObject('Server', {});
       ctx.res.setHeader('Content-Type', 'application/json; charset=UTF-8');
       return { code: 'SUCCESS', message: '成功' };
     };

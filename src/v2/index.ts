@@ -2,7 +2,7 @@ import type { Context, Row, Services } from '../core/contracts';
 import type { ApiRouter } from '../core/router';
 import { ApiError } from '../core/errors';
 import { absoluteLocation, bodyDeviceId, controlledDevice, controlledSetup, denyAdministration, paginate, saveResource, serialize, validate } from './resources';
-import { getInfo, log, refresh } from './server';
+import { getInfo, log, refresh, reportedVersion } from './server';
 import { MiniProgramFileService } from './file-service';
 
 export function registerV2(router: ApiRouter, s: Services): void {
@@ -67,7 +67,8 @@ export function registerV2(router: ApiRouter, s: Services): void {
   router.add('POST', '/v2/applet/refresh', async ctx => refresh(s, ctx, await bearer(ctx)));
   router.add('GET', '/v2/server/info', async ctx => {
     if (ctx.query.uuid === undefined) throw new ApiError(400, 'Missing required parameters: uuid');
-    return { success: true, message: 'success', data: await getInfo(s, ctx.query.uuid) };
+    const version = reportedVersion(ctx.query);
+    return { success: true, message: 'success', data: await getInfo(s, ctx.query.uuid, version) };
   });
   router.add('GET', '/v2/server/log', ctx => log(s, ctx.query.token));
   router.add('GET', '/v2/server/scenes', ctx => s.catalog.forwardCheckin(ctx));

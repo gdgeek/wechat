@@ -31,6 +31,16 @@ URL. Otherwise v1 orders use `/v1/wechat-pay/notify` and v2 file orders use
 `/v2/wechat-pay/notify`, based on `PUBLIC_ORIGIN` or the incoming request origin.
 `WECHAT_PAY_REFUND_NOTIFY_URL` is optional.
 
+`WECHAT_PLATFORM_CERTS` also accepts the Yii JSON array of local X509 certificate
+paths. Each certificate is indexed by its actual serial; repeated identical paths
+are allowed, while conflicting paths for the same serial are rejected. Invalid
+JSON, missing files and non-certificate entries fail payment verification before
+provider traffic. Explicit modern single keys override modern map entries; modern
+maps override legacy primary/list entries. A complete modern configuration can
+replace an unused legacy primary, but never hides a malformed legacy list. Payment
+configuration errors are deferred until payment/notification use, so unrelated
+login and COS operations remain available.
+
 Signing credentials stay on the server. The client receives only mini program
 payment parameters, presigned object URLs, and scoped temporary STS credentials.
 Provider errors are sanitized so URLs containing application secrets, provider
@@ -65,8 +75,8 @@ response details and signing material do not reach HTTP error messages.
   queries WeChat again and performs the same file payment checks before granting
   access; callback fields alone cannot unlock a file. Failed or still-unpaid
   confirmation returns HTTP 500 without success acknowledgment. Successfully
-  verified v1 callbacks and refund callbacks serialize to `{}`, matching Yii's
-  SDK object response. An optional `onPaymentNotification`
+  verified callbacks return JSON `{code: 'SUCCESS', message: '成功'}`, including
+  when the caller requests XML, matching the current Yii SDK response. An optional `onPaymentNotification`
   hook remains available; hook failure prevents acknowledgment.
 - The old v2 controller incorrectly required a user Bearer on WeChat callbacks.
   Callbacks now authenticate using the provider signature, while other v2
@@ -89,9 +99,11 @@ response details and signing material do not reach HTTP error messages.
   five-minute expiry, and the SDK-compatible `sign` parameter. Saved query strings,
   request overrides and fragments never reach signing; GET never creates setup.
 
-The source comparison uses the Yii snapshot captured on 2026-10-23. Intentional
-exceptions remain: invalid/empty legacy callbacks are rejected cryptographically
-even though the old unserved SDK object returned `{}`; nonpositive or unsafe v1
+The source comparison uses committed Yii `64901c9ac79271aa54027c8c33abc6f1fa3c8394`;
+see `docs/HTTP-COMPATIBILITY-2026-10-24.md`. Intentional exceptions remain:
+unknown/cross-endpoint callback events and future timestamps beyond the five-minute
+window are rejected; invalid/empty callbacks fail cryptographic validation;
+nonpositive or unsafe v1
 payment amounts fail before provider traffic; provider error details are
 sanitized; STS cannot target arbitrary buckets; and the broken QCloud action is
 repaired as described above. Scene forwarding continues to verify HTTPS

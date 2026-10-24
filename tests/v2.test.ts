@@ -277,7 +277,7 @@ describe('v2 additional compatibility cases', () => {
     expect((await f.request('GET', '/v2/devices/1')).value.version).toBe(3);
     expect((await f.request('PUT', '/v2/devices/1', { version: 99, tag: 'tag' })).value.version).toBe(3);
     await f.request('GET', '/v2/server/info', {}, { uuid: 'new-version' });
-    expect(f.db.tables.device[1].version).toBe(1);
+    expect(f.db.tables.device[1].version).toBe(0);
   });
   it('uses search-model filters on manage, applies sorting and clamps pages', async () => {
     const f = await fixture({ device: [...devices, { id: 3, uuid: 'second', tag: 'mine-2' }], control: [...controls, { id: 2, user_id: 1, device_id: 3 }] });

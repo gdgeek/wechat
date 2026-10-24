@@ -26,18 +26,18 @@
     "api/modules/v1/controllers/TencentCloudController.php": "1e5ad2ee6092aaf55d0bd725de1f3d0d87c27c6c3f32586a96b4f0f4caf40a4e",
     "api/modules/v1/controllers/WeChatController.php": "c16c0a3ae78af15b23fd704550030bb4007d3f47f336a4e275391b1044071e6f",
     "api/modules/v1/controllers/WebController.php": "ee8d6b61b9aad87295945b110b616d64ad3a96dbc1aca2cb39bbfb81861d3b84",
-    "api/modules/v1/controllers/WechatPayController.php": "049d3e58fe26b9e2a06c59be5bfcbc95d790f88193f385fc63bcdc412cc28ec4",
+    "api/modules/v1/controllers/WechatPayController.php": "6138e89c51f8d1df282aaed74016412df8f297f5c9303d1ad53a13ca84d5f2c9",
     "api/modules/v2/controllers/AppletController.php": "601a7b0add9c2ed505aacd65b06c12c2985731125c9a04875d78b7f412ebd308",
     "api/modules/v2/controllers/DeviceController.php": "cf7fc6e8a411ee7f5f82e528f6c43f1d5c9d352814f899df1a8d44fdd68fc3b0",
     "api/modules/v2/controllers/FileController.php": "dc3564c1e28a570667df08513212ea48282b8219d2ad5ce1c95be122b2823e1a",
-    "api/modules/v2/controllers/ServerController.php": "ed71a17cc3a3e796d8f09b09e71ee63a402c2bcbec44488c3dab76b8c5f31c27",
+    "api/modules/v2/controllers/ServerController.php": "aef52188ee27360a1123a68f0387ced8bfc095dbcf1e7a2dd37015d7b27088ad",
     "api/modules/v2/controllers/SetupController.php": "8b62bbbd56cf5b50ede687db88ce6905b4e491f300179f70c92b1173c746e0e7",
     "api/modules/v2/controllers/SiteController.php": "3675d9f6134997c8423b07d1bee1dcd626253316b51fe7dbe4efd8f704367f0e",
     "api/modules/v2/controllers/TencentCloudController.php": "668b0a09c854bec1f86e854713899ca27646460a700539c2716e5b40d9014e25",
     "api/modules/v2/controllers/WebLoginController.php": "d0e1f68ca187bbbb5743dc80c73d30b5d54ea6699fc262f3be03c5842a6b6481",
     "api/modules/v2/controllers/WechatController.php": "832de4741af466f8a2c736aeb9df40327214dde2038194b211d70a365aeb59ec",
-    "api/modules/v2/controllers/WechatPayController.php": "1d007b482c7d1cdfa49a37f0773f09b7f5eefe9959ed5b9b49595239871fec20",
-    "files/api/config/web.php": "150f044bf15a52e6869f6960fef539be121a25453e9288bc711ee8cb691926c4"
+    "api/modules/v2/controllers/WechatPayController.php": "153eb00aca55f7e25e37aef9127dad4df54e5448eb6c9d6c7ae46ef0f57120d9",
+    "files/api/config/web.php": "55520df5c8c8d8c1241eb2be84f8266beaf8c8338a1f066dfe804a36f142af81"
   },
   "routes": [
     {
@@ -54,10 +54,11 @@
       "actionClass": "app\\controllers\\AdminController::actionDevices",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 175,
+      "configLine": 176,
       "declaration": "GET admin-api/devices",
       "behaviorDomain": "admin-jwt",
       "tests": [
+        "tests/admin-created-at.test.ts",
         "tests/admin.test.ts",
         "tests/integration/http.test.ts",
         "tests/integration/yii-http.test.ts",
@@ -86,10 +87,11 @@
       "sourceAnyVerbFallback": false,
       "sourcePattern": "admin-api/devices/<id:\\d+>",
       "sampleMatchesSource": true,
-      "configLine": 177,
+      "configLine": 178,
       "declaration": "DELETE admin-api/devices/<id:\\d+>",
       "behaviorDomain": "admin-jwt",
       "tests": [
+        "tests/admin-created-at.test.ts",
         "tests/device-delete.test.ts",
         "tests/integration/http.test.ts",
         "tests/integration/yii-http.test.ts",
@@ -114,10 +116,11 @@
       "actionClass": "app\\controllers\\AdminController::actionSetConfiguration",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 180,
+      "configLine": 181,
       "declaration": "PUT admin-api/devices/<id:\\d+>/configuration",
       "behaviorDomain": "admin-jwt",
       "tests": [
+        "tests/admin-created-at.test.ts",
         "tests/admin.test.ts",
         "tests/integration/http.test.ts",
         "tests/integration/yii-http.test.ts",
@@ -144,10 +147,11 @@
       "actionClass": "app\\controllers\\AdminController::actionSetGame",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 179,
+      "configLine": 180,
       "declaration": "PUT admin-api/devices/<id:\\d+>/game",
       "behaviorDomain": "admin-jwt",
       "tests": [
+        "tests/admin-created-at.test.ts",
         "tests/admin.test.ts",
         "tests/integration/http.test.ts",
         "tests/integration/yii-http.test.ts",
@@ -176,10 +180,11 @@
       "sourceAnyVerbFallback": false,
       "sourcePattern": "admin-api/devices/<id:\\d+>/image-previews",
       "sampleMatchesSource": true,
-      "configLine": 176,
+      "configLine": 177,
       "declaration": "GET admin-api/devices/<id:\\d+>/image-previews",
       "behaviorDomain": "administration",
       "tests": [
+        "tests/admin-created-at.test.ts",
         "tests/admin-image-parity.test.ts",
         "tests/integration/yii-http.test.ts"
       ],
@@ -200,7 +205,7 @@
       "actionClass": "app\\controllers\\AdminController::actionGames",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 178,
+      "configLine": 179,
       "declaration": "GET admin-api/games",
       "behaviorDomain": "admin-jwt",
       "tests": [
@@ -228,7 +233,7 @@
       "actionClass": "app\\controllers\\AdminController::actionLogin",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 167,
+      "configLine": 168,
       "declaration": "POST admin-api/login",
       "behaviorDomain": "admin-jwt",
       "tests": [
@@ -256,7 +261,7 @@
       "actionClass": "app\\controllers\\AdminController::actionLogout",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 169,
+      "configLine": 170,
       "declaration": "POST admin-api/logout",
       "behaviorDomain": "admin-jwt",
       "tests": [
@@ -284,7 +289,7 @@
       "sourceAnyVerbFallback": false,
       "sourcePattern": "admin-api/refresh",
       "sampleMatchesSource": true,
-      "configLine": 168,
+      "configLine": 169,
       "declaration": "POST admin-api/refresh",
       "behaviorDomain": "admin-jwt",
       "tests": [
@@ -310,7 +315,7 @@
       "actionClass": "app\\controllers\\AdminController::actionScanLoginCreate",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 170,
+      "configLine": 171,
       "declaration": "POST admin-api/scan-login/tickets",
       "behaviorDomain": "admin-jwt",
       "tests": [
@@ -340,7 +345,7 @@
       "actionClass": "app\\controllers\\AdminController::actionScanLoginStatus",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 171,
+      "configLine": 172,
       "declaration": "GET admin-api/scan-login/tickets/<id:[a-f0-9]{32}>",
       "behaviorDomain": "admin-jwt",
       "tests": [
@@ -370,7 +375,7 @@
       "actionClass": "app\\controllers\\AdminController::actionScanLoginCancel",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 173,
+      "configLine": 174,
       "declaration": "POST admin-api/scan-login/tickets/<id:[a-f0-9]{32}>/cancel",
       "behaviorDomain": "admin-jwt",
       "tests": [
@@ -400,7 +405,7 @@
       "actionClass": "app\\controllers\\AdminController::actionScanLoginConsume",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 172,
+      "configLine": 173,
       "declaration": "POST admin-api/scan-login/tickets/<id:[a-f0-9]{32}>/consume",
       "behaviorDomain": "admin-jwt",
       "tests": [
@@ -428,7 +433,7 @@
       "actionClass": "app\\controllers\\AdminController::actionSession",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 166,
+      "configLine": 167,
       "declaration": "GET admin-api/session",
       "behaviorDomain": "admin-jwt",
       "tests": [
@@ -454,7 +459,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 187,
+      "configLine": 188,
       "declaration": "apple-app-site-association",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -483,7 +488,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 187,
+      "configLine": 188,
       "declaration": "apple-app-site-association",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -512,7 +517,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 187,
+      "configLine": 188,
       "declaration": "apple-app-site-association",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -541,7 +546,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 187,
+      "configLine": 188,
       "declaration": "apple-app-site-association",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -570,7 +575,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 187,
+      "configLine": 188,
       "declaration": "apple-app-site-association",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -599,7 +604,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 187,
+      "configLine": 188,
       "declaration": "apple-app-site-association",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -628,7 +633,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 187,
+      "configLine": 188,
       "declaration": "apple-app-site-association",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -657,7 +662,7 @@
       "actionClass": "app\\controllers\\HealthController::actionIndex",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 163,
+      "configLine": 164,
       "declaration": "GET health",
       "behaviorDomain": "health-database-redis",
       "tests": [
@@ -682,7 +687,7 @@
       "actionClass": "app\\controllers\\HealthController::actionIndex",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 164,
+      "configLine": 165,
       "declaration": "HEAD health",
       "behaviorDomain": "health-database-redis",
       "tests": [
@@ -707,7 +712,7 @@
       "actionClass": "app\\controllers\\SwaggerController::actionIndex",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 183,
+      "configLine": 184,
       "declaration": "GET swagger",
       "behaviorDomain": "swagger-basic-auth",
       "tests": [
@@ -732,7 +737,7 @@
       "actionClass": "app\\controllers\\SwaggerController::actionJsonSchema",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 184,
+      "configLine": 185,
       "declaration": "GET swagger/json-schema",
       "behaviorDomain": "swagger-basic-auth",
       "tests": [
@@ -757,7 +762,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/award",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -798,7 +803,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\AwardController::actionIndex",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/award",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -825,7 +830,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\AwardController::actionIndex",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/award",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -852,7 +857,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/award",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -893,7 +898,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/award",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -934,7 +939,7 @@
       "actionClass": "yii\\rest\\CreateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/award",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -961,7 +966,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/award",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -1004,7 +1009,7 @@
       "actionClass": "yii\\rest\\DeleteAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/award",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -1033,7 +1038,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/award",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -1062,7 +1067,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/award",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -1091,7 +1096,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/award",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -1136,7 +1141,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/award",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -1165,7 +1170,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/award",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -1210,7 +1215,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/award",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -1237,7 +1242,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1266,7 +1271,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1295,7 +1300,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1324,7 +1329,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1353,7 +1358,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1382,7 +1387,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1411,7 +1416,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1440,7 +1445,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\CheckinController::actionClose",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "v1-checkin-local-rendezvous",
       "tests": [
@@ -1467,7 +1472,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\CheckinController::actionFiles",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "v1-checkin-local-rendezvous",
       "tests": [
@@ -1494,7 +1499,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\CheckinController::actionReady",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "v1-checkin-local-rendezvous",
       "tests": [
@@ -1521,7 +1526,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\CheckinController::actionReport",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "v1-checkin-local-rendezvous",
       "tests": [
@@ -1548,7 +1553,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\CheckinController::actionStatus",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "v1-checkin-local-rendezvous",
       "tests": [
@@ -1575,7 +1580,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\CheckinController::actionStatusLinked",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "v1-checkin-local-rendezvous",
       "tests": [
@@ -1602,7 +1607,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\CheckinController::actionStatusOver",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "v1-checkin-local-rendezvous",
       "tests": [
@@ -1629,7 +1634,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\CheckinController::actionStatusReady",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "v1-checkin-local-rendezvous",
       "tests": [
@@ -1656,7 +1661,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\CheckinController::actionUpload",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "v1-checkin-local-rendezvous",
       "tests": [
@@ -1685,7 +1690,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1716,7 +1721,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1747,7 +1752,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1778,7 +1783,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1809,7 +1814,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1840,7 +1845,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1871,7 +1876,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 297,
+      "configLine": 298,
       "declaration": "yii\\rest\\UrlRule v1/checkin",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1900,7 +1905,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1929,7 +1934,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1958,7 +1963,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -1987,7 +1992,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -2016,7 +2021,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -2045,7 +2050,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -2074,7 +2079,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -2103,7 +2108,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\CommonController::actionRefreshToken",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "v1-player-auth",
       "tests": [
@@ -2130,7 +2135,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\CommonController::actionSignIn",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "v1-player-auth",
       "tests": [
@@ -2157,7 +2162,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\CommonController::actionSignUp",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "v1-player-auth",
       "tests": [
@@ -2184,7 +2189,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\CommonController::actionTest",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "v1-player-auth",
       "tests": [
@@ -2211,7 +2216,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -2242,7 +2247,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -2273,7 +2278,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -2304,7 +2309,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -2335,7 +2340,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -2366,7 +2371,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -2397,7 +2402,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 193,
+      "configLine": 194,
       "declaration": "yii\\rest\\UrlRule v1/common",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -2426,7 +2431,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/device",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -2467,7 +2472,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/device",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -2494,7 +2499,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/device",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -2521,7 +2526,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/device",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -2562,7 +2567,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/device",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -2603,7 +2608,7 @@
       "actionClass": "yii\\rest\\CreateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/device",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -2630,7 +2635,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/device",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -2673,7 +2678,7 @@
       "actionClass": "yii\\rest\\DeleteAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/device",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -2702,7 +2707,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/device",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -2731,7 +2736,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/device",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -2760,7 +2765,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/device",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -2805,7 +2810,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/device",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -2834,7 +2839,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/device",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -2879,7 +2884,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/device",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -2906,7 +2911,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -2947,7 +2952,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -2972,7 +2977,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -2997,7 +3002,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -3038,7 +3043,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -3079,7 +3084,7 @@
       "actionClass": "yii\\rest\\CreateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3104,7 +3109,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -3145,7 +3150,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\GameController::actionDevice",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3170,7 +3175,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\GameController::actionDevice",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3195,7 +3200,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\GameController::actionFinish",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3222,7 +3227,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\GameController::actionFinish",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3249,7 +3254,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\GameController::actionReady",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3274,7 +3279,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\GameController::actionReady",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3299,7 +3304,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\GameController::actionRestart",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3326,7 +3331,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\GameController::actionRestart",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3353,7 +3358,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\GameController::actionStart",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3380,7 +3385,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\GameController::actionStart",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3409,7 +3414,7 @@
       "actionClass": "yii\\rest\\DeleteAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3436,7 +3441,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3463,7 +3468,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3490,7 +3495,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -3535,7 +3540,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3562,7 +3567,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -3607,7 +3612,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 271,
+      "configLine": 272,
       "declaration": "yii\\rest\\UrlRule v1/game",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -3632,7 +3637,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/gift",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -3673,7 +3678,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\GiftController::actionIndex",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/gift",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -3700,7 +3705,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\GiftController::actionIndex",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/gift",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -3727,7 +3732,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/gift",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -3768,7 +3773,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/gift",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -3809,7 +3814,7 @@
       "actionClass": "yii\\rest\\CreateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/gift",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -3836,7 +3841,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/gift",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -3879,7 +3884,7 @@
       "actionClass": "yii\\rest\\DeleteAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/gift",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -3908,7 +3913,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/gift",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -3937,7 +3942,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/gift",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -3966,7 +3971,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/gift",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -4011,7 +4016,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/gift",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -4040,7 +4045,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/gift",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -4085,7 +4090,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/gift",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -4112,7 +4117,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -4153,7 +4158,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -4178,7 +4183,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -4203,7 +4208,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -4244,7 +4249,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -4285,7 +4290,7 @@
       "actionClass": "yii\\rest\\CreateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -4312,7 +4317,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -4353,7 +4358,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\HelperController::actionPrint",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -4378,7 +4383,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\HelperController::actionTest",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -4407,7 +4412,7 @@
       "actionClass": "yii\\rest\\DeleteAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -4434,7 +4439,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -4461,7 +4466,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -4488,7 +4493,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -4533,7 +4538,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -4560,7 +4565,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -4605,7 +4610,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 288,
+      "configLine": 289,
       "declaration": "yii\\rest\\UrlRule v1/helper",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -4630,7 +4635,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -4659,7 +4664,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -4688,7 +4693,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -4717,7 +4722,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -4746,7 +4751,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -4775,7 +4780,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -4804,7 +4809,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -4833,7 +4838,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\LocalController::actionLog",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "v1-checkin-local-rendezvous",
       "tests": [
@@ -4860,7 +4865,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\LocalController::actionRefresh",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "v1-checkin-local-rendezvous",
       "tests": [
@@ -4887,7 +4892,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\LocalController::actionRefresh",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "v1-checkin-local-rendezvous",
       "tests": [
@@ -4914,7 +4919,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\LocalController::actionTest",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "v1-checkin-local-rendezvous",
       "tests": [
@@ -4941,7 +4946,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -4972,7 +4977,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5003,7 +5008,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5034,7 +5039,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5065,7 +5070,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5096,7 +5101,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5127,7 +5132,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 313,
+      "configLine": 314,
       "declaration": "yii\\rest\\UrlRule v1/local",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5156,7 +5161,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5185,7 +5190,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5214,7 +5219,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5243,7 +5248,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5272,7 +5277,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5301,7 +5306,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5330,7 +5335,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5359,7 +5364,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5388,7 +5393,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5419,7 +5424,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5450,7 +5455,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5481,7 +5486,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5512,7 +5517,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5543,7 +5548,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5574,7 +5579,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5605,7 +5610,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 324,
+      "configLine": 325,
       "declaration": "yii\\rest\\UrlRule v1/manager",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -5634,7 +5639,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/player",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -5675,7 +5680,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/player",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -5702,7 +5707,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/player",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -5729,7 +5734,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/player",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -5770,7 +5775,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/player",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -5811,7 +5816,7 @@
       "actionClass": "yii\\rest\\CreateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/player",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -5838,7 +5843,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/player",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -5881,7 +5886,7 @@
       "actionClass": "yii\\rest\\DeleteAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/player",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -5910,7 +5915,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/player",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -5939,7 +5944,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/player",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -5968,7 +5973,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/player",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -6013,7 +6018,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/player",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -6042,7 +6047,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/player",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -6087,7 +6092,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/player",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -6114,7 +6119,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 254,
+      "configLine": 255,
       "declaration": "yii\\rest\\UrlRule v1/q-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -6143,7 +6148,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 254,
+      "configLine": 255,
       "declaration": "yii\\rest\\UrlRule v1/q-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -6172,7 +6177,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 254,
+      "configLine": 255,
       "declaration": "yii\\rest\\UrlRule v1/q-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -6201,7 +6206,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 254,
+      "configLine": 255,
       "declaration": "yii\\rest\\UrlRule v1/q-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -6230,7 +6235,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 254,
+      "configLine": 255,
       "declaration": "yii\\rest\\UrlRule v1/q-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -6259,7 +6264,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 254,
+      "configLine": 255,
       "declaration": "yii\\rest\\UrlRule v1/q-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -6288,7 +6293,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 254,
+      "configLine": 255,
       "declaration": "yii\\rest\\UrlRule v1/q-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -6317,7 +6322,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\QCloudController::actionObjectUrl",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 254,
+      "configLine": 255,
       "declaration": "yii\\rest\\UrlRule v1/q-cloud",
       "behaviorDomain": "cos-object-url",
       "tests": [
@@ -6347,7 +6352,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 254,
+      "configLine": 255,
       "declaration": "yii\\rest\\UrlRule v1/q-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -6378,7 +6383,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 254,
+      "configLine": 255,
       "declaration": "yii\\rest\\UrlRule v1/q-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -6409,7 +6414,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 254,
+      "configLine": 255,
       "declaration": "yii\\rest\\UrlRule v1/q-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -6440,7 +6445,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 254,
+      "configLine": 255,
       "declaration": "yii\\rest\\UrlRule v1/q-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -6471,7 +6476,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 254,
+      "configLine": 255,
       "declaration": "yii\\rest\\UrlRule v1/q-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -6502,7 +6507,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 254,
+      "configLine": 255,
       "declaration": "yii\\rest\\UrlRule v1/q-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -6533,7 +6538,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 254,
+      "configLine": 255,
       "declaration": "yii\\rest\\UrlRule v1/q-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -6562,7 +6567,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/record",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -6603,7 +6608,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/record",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -6630,7 +6635,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/record",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -6657,7 +6662,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/record",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -6698,7 +6703,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/record",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -6739,7 +6744,7 @@
       "actionClass": "yii\\rest\\CreateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/record",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -6766,7 +6771,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/record",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -6809,7 +6814,7 @@
       "actionClass": "yii\\rest\\DeleteAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/record",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -6838,7 +6843,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/record",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -6867,7 +6872,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/record",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -6896,7 +6901,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/record",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -6941,7 +6946,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/record",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -6970,7 +6975,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/record",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -7015,7 +7020,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/record",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -7042,7 +7047,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/shop",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -7083,7 +7088,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/shop",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -7110,7 +7115,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/shop",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -7137,7 +7142,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/shop",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -7178,7 +7183,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/shop",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -7219,7 +7224,7 @@
       "actionClass": "yii\\rest\\CreateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/shop",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -7246,7 +7251,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/shop",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -7289,7 +7294,7 @@
       "actionClass": "yii\\rest\\DeleteAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/shop",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -7318,7 +7323,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/shop",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -7347,7 +7352,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/shop",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -7376,7 +7381,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/shop",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -7421,7 +7426,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/shop",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -7450,7 +7455,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/shop",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -7495,7 +7500,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 333,
+      "configLine": 334,
       "declaration": "yii\\rest\\UrlRule v1/shop",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -7522,7 +7527,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -7551,7 +7556,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -7580,7 +7585,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -7609,7 +7614,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -7638,7 +7643,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -7667,7 +7672,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -7696,7 +7701,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -7725,7 +7730,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\SystemController::actionCloseRecord",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -7752,7 +7757,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\SystemController::actionDeductPoints",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -7779,7 +7784,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\SystemController::actionGive",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -7806,7 +7811,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\SystemController::actionPlayerInfo",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -7833,7 +7838,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -7862,7 +7867,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\SystemController::actionReadyGame",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -7889,7 +7894,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\SystemController::actionResetShop",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "v1-game-ledger",
       "tests": [
@@ -7918,7 +7923,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -7949,7 +7954,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -7980,7 +7985,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8011,7 +8016,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8042,7 +8047,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8073,7 +8078,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8104,7 +8109,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 204,
+      "configLine": 205,
       "declaration": "yii\\rest\\UrlRule v1/system",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8133,7 +8138,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8162,7 +8167,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8191,7 +8196,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8220,7 +8225,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8249,7 +8254,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8278,7 +8283,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8307,7 +8312,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8336,7 +8341,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\TencentCloudController::actionCloud",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "tencent-sts-cos",
       "tests": [
@@ -8361,7 +8366,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\TencentCloudController::actionStore",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "tencent-sts-cos",
       "tests": [
@@ -8386,7 +8391,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\TencentCloudController::actionToken",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "tencent-sts-cos",
       "tests": [
@@ -8415,7 +8420,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8446,7 +8451,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8477,7 +8482,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8508,7 +8513,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8539,7 +8544,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8570,7 +8575,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8601,7 +8606,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 244,
+      "configLine": 245,
       "declaration": "yii\\rest\\UrlRule v1/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8630,7 +8635,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8659,7 +8664,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8688,7 +8693,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8717,7 +8722,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8746,7 +8751,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8775,7 +8780,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8804,7 +8809,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8833,7 +8838,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\WeChatController::actionInfo",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "wechat-identity",
       "tests": [
@@ -8860,7 +8865,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\WeChatController::actionOpenid",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "wechat-identity",
       "tests": [
@@ -8890,7 +8895,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8921,7 +8926,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8952,7 +8957,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -8983,7 +8988,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9014,7 +9019,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9045,7 +9050,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9076,7 +9081,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 235,
+      "configLine": 236,
       "declaration": "yii\\rest\\UrlRule v1/we-chat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9105,7 +9110,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 262,
+      "configLine": 263,
       "declaration": "yii\\rest\\UrlRule v1/web",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9134,7 +9139,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 262,
+      "configLine": 263,
       "declaration": "yii\\rest\\UrlRule v1/web",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9163,7 +9168,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 262,
+      "configLine": 263,
       "declaration": "yii\\rest\\UrlRule v1/web",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9192,7 +9197,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 262,
+      "configLine": 263,
       "declaration": "yii\\rest\\UrlRule v1/web",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9221,7 +9226,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 262,
+      "configLine": 263,
       "declaration": "yii\\rest\\UrlRule v1/web",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9250,7 +9255,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 262,
+      "configLine": 263,
       "declaration": "yii\\rest\\UrlRule v1/web",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9279,7 +9284,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 262,
+      "configLine": 263,
       "declaration": "yii\\rest\\UrlRule v1/web",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9308,7 +9313,7 @@
       "actionClass": "app\\modules\\v1\\controllers\\WebController::actionAsyncRoutes",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 262,
+      "configLine": 263,
       "declaration": "yii\\rest\\UrlRule v1/web",
       "behaviorDomain": "v1-rest-resources",
       "tests": [
@@ -9337,7 +9342,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 262,
+      "configLine": 263,
       "declaration": "yii\\rest\\UrlRule v1/web",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9368,7 +9373,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 262,
+      "configLine": 263,
       "declaration": "yii\\rest\\UrlRule v1/web",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9399,7 +9404,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 262,
+      "configLine": 263,
       "declaration": "yii\\rest\\UrlRule v1/web",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9430,7 +9435,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 262,
+      "configLine": 263,
       "declaration": "yii\\rest\\UrlRule v1/web",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9461,7 +9466,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 262,
+      "configLine": 263,
       "declaration": "yii\\rest\\UrlRule v1/web",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9492,7 +9497,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 262,
+      "configLine": 263,
       "declaration": "yii\\rest\\UrlRule v1/web",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9523,7 +9528,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 262,
+      "configLine": 263,
       "declaration": "yii\\rest\\UrlRule v1/web",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9552,7 +9557,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9581,7 +9586,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9610,7 +9615,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9639,7 +9644,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9668,7 +9673,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9697,7 +9702,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9726,7 +9731,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -9755,13 +9760,14 @@
       "actionClass": "app\\modules\\v1\\controllers\\WechatPayController::actionInfo",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
-        "tests/parity.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
-        "tests/integrations.test.ts"
+        "tests/integrations.test.ts",
+        "tests/parity.test.ts"
       ],
       "testCoverage": "registration plus domain behavior tests; does not assert every field of every endpoint",
       "sourcePattern": "v1/wechat-pay/info",
@@ -9781,13 +9787,14 @@
       "actionClass": "app\\modules\\v1\\controllers\\WechatPayController::actionNotify",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
-        "tests/parity.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
-        "tests/integrations.test.ts"
+        "tests/integrations.test.ts",
+        "tests/parity.test.ts"
       ],
       "testCoverage": "registration plus domain behavior tests; does not assert every field of every endpoint",
       "sourcePattern": "v1/wechat-pay/notify",
@@ -9807,13 +9814,14 @@
       "actionClass": "app\\modules\\v1\\controllers\\WechatPayController::actionNotify",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
-        "tests/parity.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
-        "tests/integrations.test.ts"
+        "tests/integrations.test.ts",
+        "tests/parity.test.ts"
       ],
       "testCoverage": "registration plus domain behavior tests; does not assert every field of every endpoint",
       "sourcePattern": "v1/wechat-pay/notify",
@@ -9829,17 +9837,18 @@
       "controller": "api/modules/v1/controllers/WechatPayController.php",
       "sourceStatus": "resolvable",
       "actionSource": "api/modules/v1/controllers/WechatPayController.php",
-      "actionLine": 328,
+      "actionLine": 335,
       "actionClass": "app\\modules\\v1\\controllers\\WechatPayController::actionRefundNotify",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
-        "tests/parity.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
-        "tests/integrations.test.ts"
+        "tests/integrations.test.ts",
+        "tests/parity.test.ts"
       ],
       "testCoverage": "registration plus domain behavior tests; does not assert every field of every endpoint",
       "sourcePattern": "v1/wechat-pay/refund-notify",
@@ -9859,13 +9868,14 @@
       "actionClass": "app\\modules\\v1\\controllers\\WechatPayController::actionWxpayOrder",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
-        "tests/parity.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
-        "tests/integrations.test.ts"
+        "tests/integrations.test.ts",
+        "tests/parity.test.ts"
       ],
       "testCoverage": "registration plus domain behavior tests; does not assert every field of every endpoint",
       "sourcePattern": "v1/wechat-pay/wxpay-order",
@@ -9881,17 +9891,18 @@
       "controller": "api/modules/v1/controllers/WechatPayController.php",
       "sourceStatus": "resolvable",
       "actionSource": "api/modules/v1/controllers/WechatPayController.php",
-      "actionLine": 145,
+      "actionLine": 152,
       "actionClass": "app\\modules\\v1\\controllers\\WechatPayController::actionWxpayQueryOrderByOutTradeNo",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
-        "tests/parity.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
-        "tests/integrations.test.ts"
+        "tests/integrations.test.ts",
+        "tests/parity.test.ts"
       ],
       "testCoverage": "registration plus domain behavior tests; does not assert every field of every endpoint",
       "sourcePattern": "v1/wechat-pay/wxpay-query-order-by-out-trade-no",
@@ -9907,17 +9918,18 @@
       "controller": "api/modules/v1/controllers/WechatPayController.php",
       "sourceStatus": "resolvable",
       "actionSource": "api/modules/v1/controllers/WechatPayController.php",
-      "actionLine": 361,
+      "actionLine": 375,
       "actionClass": "app\\modules\\v1\\controllers\\WechatPayController::actionWxpayQueryOrderByTransactionId",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
-        "tests/parity.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
-        "tests/integrations.test.ts"
+        "tests/integrations.test.ts",
+        "tests/parity.test.ts"
       ],
       "testCoverage": "registration plus domain behavior tests; does not assert every field of every endpoint",
       "sourcePattern": "v1/wechat-pay/wxpay-query-order-by-transaction-id",
@@ -9933,17 +9945,18 @@
       "controller": "api/modules/v1/controllers/WechatPayController.php",
       "sourceStatus": "resolvable",
       "actionSource": "api/modules/v1/controllers/WechatPayController.php",
-      "actionLine": 281,
+      "actionLine": 288,
       "actionClass": "app\\modules\\v1\\controllers\\WechatPayController::actionWxpayQueryRefund",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
-        "tests/parity.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
-        "tests/integrations.test.ts"
+        "tests/integrations.test.ts",
+        "tests/parity.test.ts"
       ],
       "testCoverage": "registration plus domain behavior tests; does not assert every field of every endpoint",
       "sourcePattern": "v1/wechat-pay/wxpay-query-refund",
@@ -9959,17 +9972,18 @@
       "controller": "api/modules/v1/controllers/WechatPayController.php",
       "sourceStatus": "resolvable",
       "actionSource": "api/modules/v1/controllers/WechatPayController.php",
-      "actionLine": 195,
+      "actionLine": 202,
       "actionClass": "app\\modules\\v1\\controllers\\WechatPayController::actionWxpayRefund",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
-        "tests/parity.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
-        "tests/integrations.test.ts"
+        "tests/integrations.test.ts",
+        "tests/parity.test.ts"
       ],
       "testCoverage": "registration plus domain behavior tests; does not assert every field of every endpoint",
       "sourcePattern": "v1/wechat-pay/wxpay-refund",
@@ -9991,7 +10005,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10022,7 +10036,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10053,7 +10067,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10084,7 +10098,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10115,7 +10129,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10146,7 +10160,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10177,7 +10191,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 219,
+      "configLine": 220,
       "declaration": "yii\\rest\\UrlRule v1/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10206,7 +10220,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 355,
+      "configLine": 356,
       "declaration": "yii\\rest\\UrlRule v2/applet",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10235,7 +10249,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 355,
+      "configLine": 356,
       "declaration": "yii\\rest\\UrlRule v2/applet",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10264,7 +10278,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 355,
+      "configLine": 356,
       "declaration": "yii\\rest\\UrlRule v2/applet",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10293,7 +10307,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 355,
+      "configLine": 356,
       "declaration": "yii\\rest\\UrlRule v2/applet",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10322,7 +10336,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 355,
+      "configLine": 356,
       "declaration": "yii\\rest\\UrlRule v2/applet",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10351,7 +10365,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 355,
+      "configLine": 356,
       "declaration": "yii\\rest\\UrlRule v2/applet",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10380,7 +10394,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 355,
+      "configLine": 356,
       "declaration": "yii\\rest\\UrlRule v2/applet",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10409,7 +10423,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\AppletController::actionRefresh",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 355,
+      "configLine": 356,
       "declaration": "yii\\rest\\UrlRule v2/applet",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -10438,7 +10452,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 355,
+      "configLine": 356,
       "declaration": "yii\\rest\\UrlRule v2/applet",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10469,7 +10483,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 355,
+      "configLine": 356,
       "declaration": "yii\\rest\\UrlRule v2/applet",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10500,7 +10514,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 355,
+      "configLine": 356,
       "declaration": "yii\\rest\\UrlRule v2/applet",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10531,7 +10545,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 355,
+      "configLine": 356,
       "declaration": "yii\\rest\\UrlRule v2/applet",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10562,7 +10576,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 355,
+      "configLine": 356,
       "declaration": "yii\\rest\\UrlRule v2/applet",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10593,7 +10607,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 355,
+      "configLine": 356,
       "declaration": "yii\\rest\\UrlRule v2/applet",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10624,7 +10638,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 355,
+      "configLine": 356,
       "declaration": "yii\\rest\\UrlRule v2/applet",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -10653,7 +10667,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -10694,7 +10708,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -10721,7 +10735,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -10748,7 +10762,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -10789,7 +10803,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -10830,7 +10844,7 @@
       "actionClass": "yii\\rest\\CreateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -10857,7 +10871,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -10898,7 +10912,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\DeviceController::actionAssign",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -10925,7 +10939,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\DeviceController::actionManage",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -10954,7 +10968,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\DeviceController::actionAssign",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -10984,7 +10998,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\DeviceController::actionUnassign",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -11013,7 +11027,7 @@
       "actionClass": "yii\\rest\\DeleteAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -11042,7 +11056,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -11071,7 +11085,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -11100,7 +11114,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -11145,7 +11159,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -11174,7 +11188,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -11219,7 +11233,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 399,
+      "configLine": 400,
       "declaration": "yii\\rest\\UrlRule v2/device",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -11246,7 +11260,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 415,
+      "configLine": 416,
       "declaration": "yii\\rest\\UrlRule v2/file",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -11287,7 +11301,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 415,
+      "configLine": 416,
       "declaration": "yii\\rest\\UrlRule v2/file",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -11314,7 +11328,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 415,
+      "configLine": 416,
       "declaration": "yii\\rest\\UrlRule v2/file",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -11341,7 +11355,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 415,
+      "configLine": 416,
       "declaration": "yii\\rest\\UrlRule v2/file",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -11382,7 +11396,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 415,
+      "configLine": 416,
       "declaration": "yii\\rest\\UrlRule v2/file",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -11423,7 +11437,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 415,
+      "configLine": 416,
       "declaration": "yii\\rest\\UrlRule v2/file",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -11450,7 +11464,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 415,
+      "configLine": 416,
       "declaration": "yii\\rest\\UrlRule v2/file",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -11491,7 +11505,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\FileController::actionList",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 415,
+      "configLine": 416,
       "declaration": "yii\\rest\\UrlRule v2/file",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -11520,7 +11534,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 415,
+      "configLine": 416,
       "declaration": "yii\\rest\\UrlRule v2/file",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -11551,7 +11565,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 415,
+      "configLine": 416,
       "declaration": "yii\\rest\\UrlRule v2/file",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -11580,7 +11594,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 415,
+      "configLine": 416,
       "declaration": "yii\\rest\\UrlRule v2/file",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -11609,7 +11623,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 415,
+      "configLine": 416,
       "declaration": "yii\\rest\\UrlRule v2/file",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -11654,7 +11668,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 415,
+      "configLine": 416,
       "declaration": "yii\\rest\\UrlRule v2/file",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -11683,7 +11697,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 415,
+      "configLine": 416,
       "declaration": "yii\\rest\\UrlRule v2/file",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -11728,7 +11742,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 415,
+      "configLine": 416,
       "declaration": "yii\\rest\\UrlRule v2/file",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -11755,7 +11769,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -11784,7 +11798,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -11813,7 +11827,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -11842,7 +11856,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -11871,7 +11885,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -11900,7 +11914,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -11929,7 +11943,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -11958,7 +11972,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\ServerController::actionApplet",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -11985,7 +11999,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\ServerController::actionDevice",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -12012,7 +12026,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\ServerController::actionFile",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -12035,16 +12049,17 @@
       "controller": "api/modules/v2/controllers/ServerController.php",
       "sourceStatus": "resolvable",
       "actionSource": "api/modules/v2/controllers/ServerController.php",
-      "actionLine": 146,
+      "actionLine": 154,
       "actionClass": "app\\modules\\v2\\controllers\\ServerController::actionInfo",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
         "tests/integration/yii-http.test.ts",
         "tests/parity.test.ts",
+        "tests/server-info-version.test.ts",
         "tests/v2.test.ts"
       ],
       "testCoverage": "registration plus domain behavior tests; does not assert every field of every endpoint",
@@ -12062,11 +12077,11 @@
       "controller": "api/modules/v2/controllers/ServerController.php",
       "sourceStatus": "resolvable",
       "actionSource": "api/modules/v2/controllers/ServerController.php",
-      "actionLine": 171,
+      "actionLine": 186,
       "actionClass": "app\\modules\\v2\\controllers\\ServerController::actionLog",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -12093,7 +12108,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\ServerController::actionRefresh",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -12120,7 +12135,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\ServerController::actionRefresh",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -12143,11 +12158,11 @@
       "controller": "api/modules/v2/controllers/ServerController.php",
       "sourceStatus": "resolvable",
       "actionSource": "api/modules/v2/controllers/ServerController.php",
-      "actionLine": 201,
+      "actionLine": 216,
       "actionClass": "app\\modules\\v2\\controllers\\ServerController::actionScenes",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -12168,11 +12183,11 @@
       "controller": "api/modules/v2/controllers/ServerController.php",
       "sourceStatus": "resolvable",
       "actionSource": "api/modules/v2/controllers/ServerController.php",
-      "actionLine": 187,
+      "actionLine": 202,
       "actionClass": "app\\modules\\v2\\controllers\\ServerController::actionTest",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -12199,7 +12214,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -12230,7 +12245,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -12261,7 +12276,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -12292,7 +12307,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -12323,7 +12338,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -12354,7 +12369,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -12385,7 +12400,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 338,
+      "configLine": 339,
       "declaration": "yii\\rest\\UrlRule v2/server",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -12414,7 +12429,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 410,
+      "configLine": 411,
       "declaration": "yii\\rest\\UrlRule v2/setup",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -12455,7 +12470,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 410,
+      "configLine": 411,
       "declaration": "yii\\rest\\UrlRule v2/setup",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -12482,7 +12497,7 @@
       "actionClass": "yii\\rest\\IndexAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 410,
+      "configLine": 411,
       "declaration": "yii\\rest\\UrlRule v2/setup",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -12509,7 +12524,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 410,
+      "configLine": 411,
       "declaration": "yii\\rest\\UrlRule v2/setup",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -12550,7 +12565,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 410,
+      "configLine": 411,
       "declaration": "yii\\rest\\UrlRule v2/setup",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -12591,7 +12606,7 @@
       "actionClass": "yii\\rest\\CreateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 410,
+      "configLine": 411,
       "declaration": "yii\\rest\\UrlRule v2/setup",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -12618,7 +12633,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 410,
+      "configLine": 411,
       "declaration": "yii\\rest\\UrlRule v2/setup",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -12661,7 +12676,7 @@
       "actionClass": "yii\\rest\\DeleteAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 410,
+      "configLine": 411,
       "declaration": "yii\\rest\\UrlRule v2/setup",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -12690,7 +12705,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 410,
+      "configLine": 411,
       "declaration": "yii\\rest\\UrlRule v2/setup",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -12719,7 +12734,7 @@
       "actionClass": "yii\\rest\\ViewAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 410,
+      "configLine": 411,
       "declaration": "yii\\rest\\UrlRule v2/setup",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -12748,7 +12763,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 410,
+      "configLine": 411,
       "declaration": "yii\\rest\\UrlRule v2/setup",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -12793,7 +12808,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 410,
+      "configLine": 411,
       "declaration": "yii\\rest\\UrlRule v2/setup",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -12822,7 +12837,7 @@
       "actionClass": "yii\\rest\\OptionsAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": true,
-      "configLine": 410,
+      "configLine": 411,
       "declaration": "yii\\rest\\UrlRule v2/setup",
       "behaviorDomain": "rest-options",
       "tests": [
@@ -12867,7 +12882,7 @@
       "actionClass": "yii\\rest\\UpdateAction",
       "inheritedRestAction": true,
       "sourceAnyVerbFallback": false,
-      "configLine": 410,
+      "configLine": 411,
       "declaration": "yii\\rest\\UrlRule v2/setup",
       "behaviorDomain": "v2-device-setup-file-rendezvous",
       "tests": [
@@ -12894,7 +12909,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -12923,7 +12938,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -12952,7 +12967,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -12981,7 +12996,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13010,7 +13025,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13039,7 +13054,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13068,7 +13083,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13097,7 +13112,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\SiteController::actionLogin",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "wechat-identity",
       "tests": [
@@ -13125,7 +13140,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\SiteController::actionRefreshToken",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "wechat-identity",
       "tests": [
@@ -13155,7 +13170,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13186,7 +13201,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13217,7 +13232,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13248,7 +13263,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13279,7 +13294,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13310,7 +13325,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13341,7 +13356,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 390,
+      "configLine": 391,
       "declaration": "yii\\rest\\UrlRule v2/site",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13370,7 +13385,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13399,7 +13414,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13428,7 +13443,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13457,7 +13472,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13486,7 +13501,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13515,7 +13530,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13544,7 +13559,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13573,7 +13588,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\TencentCloudController::actionCloud",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "tencent-sts-cos",
       "tests": [
@@ -13598,7 +13613,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\TencentCloudController::actionStore",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "tencent-sts-cos",
       "tests": [
@@ -13623,7 +13638,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\TencentCloudController::actionToken",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "tencent-sts-cos",
       "tests": [
@@ -13650,7 +13665,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13681,7 +13696,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13712,7 +13727,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13743,7 +13758,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13774,7 +13789,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13805,7 +13820,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13836,7 +13851,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 423,
+      "configLine": 424,
       "declaration": "yii\\rest\\UrlRule v2/tencent-cloud",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13867,7 +13882,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\WebLoginController::actionApprove",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 174,
+      "configLine": 175,
       "declaration": "POST v2/web-login/tickets/<id:[a-f0-9]{32}>/approve",
       "behaviorDomain": "admin-jwt",
       "tests": [
@@ -13895,7 +13910,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13924,7 +13939,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13953,7 +13968,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -13982,7 +13997,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14011,7 +14026,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14040,7 +14055,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14069,7 +14084,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14098,7 +14113,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14127,7 +14142,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14156,7 +14171,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14185,7 +14200,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14214,7 +14229,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14243,7 +14258,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14272,7 +14287,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14301,13 +14316,14 @@
       "actionClass": "app\\modules\\v2\\controllers\\WechatPayController::actionNotify",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
-        "tests/parity.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
-        "tests/integrations.test.ts"
+        "tests/integrations.test.ts",
+        "tests/parity.test.ts"
       ],
       "testCoverage": "registration plus domain behavior tests; does not assert every field of every endpoint",
       "sourcePattern": "v2/wechat-pay/notify",
@@ -14327,13 +14343,14 @@
       "actionClass": "app\\modules\\v2\\controllers\\WechatPayController::actionNotify",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
-        "tests/parity.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
-        "tests/integrations.test.ts"
+        "tests/integrations.test.ts",
+        "tests/parity.test.ts"
       ],
       "testCoverage": "registration plus domain behavior tests; does not assert every field of every endpoint",
       "sourcePattern": "v2/wechat-pay/notify",
@@ -14349,17 +14366,18 @@
       "controller": "api/modules/v2/controllers/WechatPayController.php",
       "sourceStatus": "resolvable",
       "actionSource": "api/modules/v2/controllers/WechatPayController.php",
-      "actionLine": 433,
+      "actionLine": 434,
       "actionClass": "app\\modules\\v2\\controllers\\WechatPayController::actionRefundNotify",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
-        "tests/parity.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
-        "tests/integrations.test.ts"
+        "tests/integrations.test.ts",
+        "tests/parity.test.ts"
       ],
       "testCoverage": "registration plus domain behavior tests; does not assert every field of every endpoint",
       "sourcePattern": "v2/wechat-pay/refund-notify",
@@ -14379,11 +14397,12 @@
       "actionClass": "app\\modules\\v2\\controllers\\WechatPayController::actionWxpayOrder",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
         "tests/integration/yii-http.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
         "tests/integrations.test.ts",
         "tests/parity.test.ts"
@@ -14403,15 +14422,16 @@
       "controller": "api/modules/v2/controllers/WechatPayController.php",
       "sourceStatus": "resolvable",
       "actionSource": "api/modules/v2/controllers/WechatPayController.php",
-      "actionLine": 196,
+      "actionLine": 197,
       "actionClass": "app\\modules\\v2\\controllers\\WechatPayController::actionWxpayQueryOrderByOutTradeNo",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
         "tests/integration/yii-http.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
         "tests/integrations.test.ts",
         "tests/parity.test.ts"
@@ -14431,15 +14451,16 @@
       "controller": "api/modules/v2/controllers/WechatPayController.php",
       "sourceStatus": "resolvable",
       "actionSource": "api/modules/v2/controllers/WechatPayController.php",
-      "actionLine": 479,
+      "actionLine": 487,
       "actionClass": "app\\modules\\v2\\controllers\\WechatPayController::actionWxpayQueryOrderByTransactionId",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
         "tests/integration/yii-http.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
         "tests/integrations.test.ts",
         "tests/parity.test.ts"
@@ -14459,15 +14480,16 @@
       "controller": "api/modules/v2/controllers/WechatPayController.php",
       "sourceStatus": "resolvable",
       "actionSource": "api/modules/v2/controllers/WechatPayController.php",
-      "actionLine": 380,
+      "actionLine": 381,
       "actionClass": "app\\modules\\v2\\controllers\\WechatPayController::actionWxpayQueryRefund",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
         "tests/integration/yii-http.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
         "tests/integrations.test.ts",
         "tests/parity.test.ts"
@@ -14487,15 +14509,16 @@
       "controller": "api/modules/v2/controllers/WechatPayController.php",
       "sourceStatus": "resolvable",
       "actionSource": "api/modules/v2/controllers/WechatPayController.php",
-      "actionLine": 281,
+      "actionLine": 282,
       "actionClass": "app\\modules\\v2\\controllers\\WechatPayController::actionWxpayRefund",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "wechat-pay-apiv3",
       "tests": [
         "tests/integration/yii-http.test.ts",
+        "tests/integrations-certificates.test.ts",
         "tests/integrations.payments.test.ts",
         "tests/integrations.test.ts",
         "tests/parity.test.ts"
@@ -14521,7 +14544,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14552,7 +14575,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14583,7 +14606,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14614,7 +14637,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14645,7 +14668,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14676,7 +14699,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14707,7 +14730,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 363,
+      "configLine": 364,
       "declaration": "yii\\rest\\UrlRule v2/wechat-pay",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14736,7 +14759,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\WechatController::actionBindPhone",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "wechat-identity",
       "tests": [
@@ -14764,7 +14787,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14793,7 +14816,7 @@
       "actionClass": "app\\modules\\v2\\controllers\\WechatController::actionProfile",
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "wechat-identity",
       "tests": [
@@ -14823,7 +14846,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14854,7 +14877,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14885,7 +14908,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14916,7 +14939,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14947,7 +14970,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -14978,7 +15001,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": true,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -15009,7 +15032,7 @@
       "actionClass": null,
       "inheritedRestAction": false,
       "sourceAnyVerbFallback": false,
-      "configLine": 379,
+      "configLine": 380,
       "declaration": "yii\\rest\\UrlRule v2/wechat",
       "behaviorDomain": "declared-404",
       "tests": [
@@ -15026,8 +15049,8 @@
     }
   ],
   "source": "gdgeek/game",
-  "sourceSnapshot": "source-manifest.json current-game alignment",
-  "sourceRootAtGeneration": "/private/tmp/wechat-current-game-baseline",
+  "sourceSnapshot": "source-manifest.json committed Yii 64901c9ac79271aa54027c8c33abc6f1fa3c8394",
+  "sourceRootAtGeneration": "/private/tmp/game-c4mr-publish-20261024",
   "generation": {
     "configuration": "files/api/config/web.php",
     "strictParsing": true,
@@ -15213,7 +15236,7 @@
       "sample": "/admin-api/session",
       "sourceStatus": "unconfigured-404",
       "matchedSourceRules": [],
-      "configLine": 166,
+      "configLine": 167,
       "sourceDeclaration": "GET admin-api/session",
       "reason": "Strict URL parsing; the GET-only declaration has no HEAD variant and no wildcard OptionsAction pattern matches this literal path. Verified against the complete ordered frozen Yii rules.",
       "tests": [
@@ -15226,7 +15249,7 @@
       "sample": "/v1/common/test",
       "sourceStatus": "unconfigured-404",
       "matchedSourceRules": [],
-      "configLine": 192,
+      "configLine": 193,
       "sourceDeclaration": "yii\\rest\\UrlRule v1/common",
       "reason": "Strict URL parsing; the GET-only declaration has no HEAD variant and no wildcard OptionsAction pattern matches this literal path. Verified against the complete ordered frozen Yii rules.",
       "tests": [
@@ -15239,7 +15262,7 @@
       "sample": "/v1/game/ready",
       "sourceStatus": "unconfigured-404",
       "matchedSourceRules": [],
-      "configLine": 270,
+      "configLine": 271,
       "sourceDeclaration": "yii\\rest\\UrlRule v1/game",
       "reason": "Strict URL parsing; the GET-only declaration has no HEAD variant and no wildcard OptionsAction pattern matches this literal path. Verified against the complete ordered frozen Yii rules.",
       "tests": [
@@ -15252,7 +15275,7 @@
       "sample": "/v2/server/info",
       "sourceStatus": "unconfigured-404",
       "matchedSourceRules": [],
-      "configLine": 337,
+      "configLine": 338,
       "sourceDeclaration": "yii\\rest\\UrlRule v2/server",
       "reason": "Strict URL parsing; the GET-only declaration has no HEAD variant and no wildcard OptionsAction pattern matches this literal path. Verified against the complete ordered frozen Yii rules.",
       "tests": [
@@ -15265,7 +15288,7 @@
       "sample": "/v2/files/list",
       "sourceStatus": "unconfigured-404",
       "matchedSourceRules": [],
-      "configLine": 414,
+      "configLine": 415,
       "sourceDeclaration": "yii\\rest\\UrlRule v2/file",
       "reason": "Strict URL parsing; the GET-only declaration has no HEAD variant and no wildcard OptionsAction pattern matches this literal path. Verified against the complete ordered frozen Yii rules.",
       "tests": [
@@ -15282,7 +15305,7 @@
       "matchedSourceRules": [
         "v2/wechat/info"
       ],
-      "configLine": 378,
+      "configLine": 379,
       "reason": "The configured URL reaches a missing action; preserve the original 404 rather than inventing public configuration.",
       "tests": [
         "tests/parity.test.ts"
@@ -15294,7 +15317,7 @@
       "sample": "/v2/wechat/code",
       "sourceStatus": "unrouted-action",
       "matchedSourceRules": [],
-      "configLine": 356,
+      "configLine": 357,
       "actionSource": "api/modules/v2/controllers/WechatController.php",
       "actionLine": 40,
       "reason": "The inline action exists but no strict URL declaration publishes it; preserve 404.",

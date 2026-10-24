@@ -1,10 +1,12 @@
-import { describe, expect, it, vi } from 'vitest';
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
+import type { INestApplication } from '@nestjs/common';
+import supertest from 'supertest';
 import { createCipheriv, generateKeyPairSync, sign, verify } from 'node:crypto';
 import { once } from 'node:events';
 import { createServer } from 'node:http';
 import type { AddressInfo } from 'node:net';
 import { DatabaseSync } from 'node:sqlite';
-import { xmlResponse } from '../src/core/serialization';
+import { createApplication } from '../src/application';
 import { ApiRouter } from '../src/core/router';
 import type { Context, Row, Services } from '../src/core/contracts';
 import { Integrations, registerIntegrations } from '../src/integrations/integrations';
@@ -57,7 +59,7 @@ function setup(overrides: Partial<IntegrationOptions> = {}, reserved = true) {
   const res = { setHeader: vi.fn(), status(status: number) { responseStatuses.push(status); return res; } };
   const call = async (method: string, path: string, body: Row = {}, query: Row = {}, rawBody = '', headers: Row = {}) => router.match(method, path)!.route.handler({ body, query, params: {}, req: { headers, rawBody: Buffer.from(rawBody), protocol: 'https', get: () => 'legacy.example.test' }, res } as unknown as Context);
   const file = () => db.one('SELECT * FROM file WHERE id = ?', [1]);
-  return { requests, call, provider, db, file, responseStatuses, reservationsAtProvider };
+  return { requests, call, provider, db, file, responseStatuses, reservationsAtProvider, services };
 }
 
 function notice(refund = false, merchant = 'merchant') {
@@ -172,11 +174,9 @@ describe('payment endpoints with cryptographic provider transport', () => {
     for (const version of ['v1', 'v2']) {
       const paid = notice(false), refund = notice(true);
       const paidResponse = await call('POST', `/${version}/wechat-pay/notify`, {}, {}, paid.raw, paid.headers);
-      expect(paidResponse).toEqual(version === 'v2' ? { code: 'SUCCESS', message: '成功' } : {});
-      if (version === 'v1') expect(xmlResponse(paidResponse)).toContain('<response><Server/></response>');
+      expect(paidResponse).toEqual({ code: 'SUCCESS', message: '成功' });
       const refundedResponse = await call('POST', `/${version}/wechat-pay/refund-notify`, {}, {}, refund.raw, refund.headers);
-      expect(refundedResponse).toEqual({});
-      expect(xmlResponse(refundedResponse)).toContain('<response><Server/></response>');
+      expect(refundedResponse).toEqual({ code: 'SUCCESS', message: '成功' });
       await expect(call('POST', `/${version}/wechat-pay/refund-notify`, {}, {}, paid.raw, paid.headers)).rejects.toThrow('类型不匹配');
       const wrongMerchant = notice(false, 'attacker');
       await expect(call('POST', `/${version}/wechat-pay/notify`, {}, {}, wrongMerchant.raw, wrongMerchant.headers)).rejects.toThrow('商户身份不匹配');
@@ -351,5 +351,38 @@ describe('payment endpoints with cryptographic provider transport', () => {
     expect(await f.call('POST', '/v2/wechat-pay/notify', {}, {}, paid.raw, paid.headers)).toEqual({ code: 'ERROR', message: '订单账号不存在' });
     expect(f.responseStatuses.at(-1)).toBe(500);
     expect(f.requests).toHaveLength(requests);
+  });
+});
+
+describe('current Yii payment callback HTTP acknowledgements', () => {
+  let app: INestApplication;
+  let request: ReturnType<typeof supertest>;
+  beforeAll(async () => {
+    vi.stubEnv('NODE_ENV', 'test');
+    const fixture = setup();
+    app = await createApplication(fixture.services);
+    request = supertest(app.getHttpServer());
+  });
+  afterAll(async () => { await app?.close(); vi.unstubAllEnvs(); });
+
+  it.each([
+    ['/v1/wechat-pay/notify', false, 'application/json'],
+    ['/v1/wechat-pay/notify', false, 'application/xml'],
+    ['/v1/wechat-pay/refund-notify', true, 'application/json'],
+    ['/v1/wechat-pay/refund-notify', true, 'application/xml'],
+    ['/v2/wechat-pay/notify', false, 'application/json'],
+    ['/v2/wechat-pay/notify', false, 'application/xml'],
+    ['/v2/wechat-pay/refund-notify', true, 'application/json'],
+    ['/v2/wechat-pay/refund-notify', true, 'application/xml'],
+  ] as const)('acknowledges %s (refund=%s) with JSON for Accept %s', async (path, refund, accept) => {
+    const signed = notice(refund);
+    const response = await request.post(path)
+      .set(signed.headers)
+      .set('Content-Type', 'application/json')
+      .set('Accept', accept)
+      .send(signed.raw)
+      .expect(200);
+    expect(response.headers['content-type']).toMatch(/^application\/json/);
+    expect(response.body).toEqual({ code: 'SUCCESS', message: '成功' });
   });
 });

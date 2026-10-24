@@ -1,8 +1,8 @@
 {
   "source": "gdgeek/game Yii HTTP execution",
-  "sourceHead": "412ce84b7a6c3f33d0917e5be35435f04db842e1",
-  "sourceCapturedAt": "2026-10-22T18:42:40.215688+00:00",
-  "urlConfigSha256": "150f044bf15a52e6869f6960fef539be121a25453e9288bc711ee8cb691926c4",
+  "sourceHead": "64901c9ac79271aa54027c8c33abc6f1fa3c8394",
+  "sourceCapturedAt": "2026-10-24T13:19:51.135208Z",
+  "urlConfigSha256": "55520df5c8c8d8c1241eb2be84f8266beaf8c8338a1f066dfe804a36f142af81",
   "scope": "Anonymous requests with empty JSON body, Origin https://isolated.example, YII_DEBUG=true. Missing routes, precondition/auth failures and OPTIONS fallbacks only. HTML compares title/media/status; cookies/assets and dynamic business successes are excluded. Values captured by running frozen PHP controllers; no Node outputs used as expectations.",
   "count": 441,
   "groups": [
