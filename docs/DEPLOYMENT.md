@@ -25,7 +25,7 @@ Node 后端使用独立镜像 `hkccr.ccs.tencentyun.com/gdgeek/wechat2`，Portai
 | 数据库 / Redis | 对应现有 `game` 的连接配置 | 对应现有 `game` 的连接配置 |
 | `GAME_KEYS_DIRECTORY` | 宿主机只读密钥目录 | 宿主机只读密钥目录 |
 
-示例中的 `JWT_KEY_FILE`、`ADMIN_JWT_KEY_FILE`、`ADMIN_JWT_PUB_KEY_FILE` 是该密钥目录内现有文件的相对路径。`ADMIN_AUTH_ISSUER` 和鉴权 Redis 配置沿用 `game`，不要因入口域名变更而重新生成身份域或密钥。`ADMIN_SCAN_LOGIN_ORIGIN` 也沿用现有统一管理入口 `https://checkin.voxel.cn`，无需修改小程序的扫码可信域名。业务 Token 与管理 JWT 继续使用各自的凭据。
+示例中的 `JWT_KEY_FILE`、`ADMIN_JWT_KEY_FILE`、`ADMIN_JWT_PUB_KEY_FILE` 是该密钥目录内现有文件的相对路径。`ADMIN_AUTH_ISSUER` 和鉴权 Redis 配置沿用 `game`，不要因入口域名变更而重新生成身份域或密钥。`ADMIN_SCAN_LOGIN_ORIGIN` 也沿用现有统一管理入口 `https://c.4mr.cn`，无需修改小程序的扫码可信域名。业务 Token 与管理 JWT 继续使用各自的凭据。
 
 ```yaml
 services:
